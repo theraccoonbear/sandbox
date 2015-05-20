@@ -26,12 +26,25 @@ Environment.prototype.addCrit = function(crit) {
 	this.stage.addChild(crit.getShape());
 };
 
+Environment.prototype.killCrit = function(crit) {
+	for (var i = 0, l = this.critters.length; i < l; i++) {
+		if (this.critters[i].id == crit.id) {
+			this.stage.removeChild(crit.shape);
+			this.critters.splice(i, 1);
+			break;
+		}
+	}
+};
+
 Environment.prototype.tick = function() {
 	var ctxt = this;
 	for (var i = 0, l = ctxt.critters.length; i < l; i++) {
 		var c = ctxt.critters[i];
 		c.tick();
 	}
+	
+	this.addCrit(new Critter());
+	
 	this.stage.update();
 };
 
@@ -46,7 +59,7 @@ Environment.prototype.randomPosition = function() {
 
 Environment.prototype.findAll = function(type, filter) {
 	var matches = [];
-	if (typeof type !== 'object' || !type.length) {
+	if (!Array.isArray(type)) {
 		type = [type];
 	}
 	for (var i = 0, l = this.critters.length; i < l; i++) {
