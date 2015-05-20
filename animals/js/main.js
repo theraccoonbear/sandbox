@@ -18,7 +18,7 @@ env.init();
 
 
 
-for (var i = 0; i < 200; i++) {
+for (var i = 0; i < 10; i++) {
 	var pos = env.randomPosition();
 	var cfg = {};
 	if (Math.random() > 0.5) {
@@ -29,5 +29,7 @@ for (var i = 0; i < 200; i++) {
 	cfg.y = pos.y;
 	env.addCrit(cfg);
 }
+
+env.start();
 
 //env.addCrit(new Critter());

@@ -4,17 +4,18 @@ var CTypes = {
 		speed: 3,
 		vitality: 100,
 		matures_at: 100,
-		diest_at: 500,
+		diest_at: 5000,
 		type: 'bug',
 		eats: ['microbe'],
 		flight: true,
 		height: 1,
 		getShape: function(o) {
-			var colors = ['#000000', '#111111', '#222222', '#333333'];
+			var colors = ['#000000', '#222222', '#444444', '#666666'];
 			
 			var c = colors[Math.floor(Math.random() * colors.length)]
 			
 			this.shape = new createjs.Shape();
+			this.shape.name = this.id;
 			this.shape.graphics.beginFill(c).drawEllipse(0, 0, 10, 5);
 			this.shape.x = this.x;
 			this.shape.y = this.y;
@@ -32,7 +33,7 @@ var Critter = function(opts) {
 		vitality: 10,
 		hunger: 0,
 		matures_at: 3,
-		dies_at: 10,
+		dies_at: 1000,
 		type: 'microbe',
 		height: 0,
 		flight: false,
@@ -48,6 +49,7 @@ var Critter = function(opts) {
 			var c = colors[Math.floor(Math.random() * colors.length)]
 			
 			this.shape = new createjs.Shape();
+			this.shape.name = this.id;
 			this.shape.graphics.beginFill(c).drawCircle(0, 0, 2);
 			this.shape.x = ctxt.x;
 			this.shape.y = ctxt.y;
@@ -55,7 +57,7 @@ var Critter = function(opts) {
 		}
 	};
 	
-	this.id = Math.random() * 100000000;
+	this.id = (Math.random() * 100000000).toString().replace(/[^0-9]/, '');
 	
 	for (var p in _defaults) {
 		this[p] = opts[p] || _defaults[p];
@@ -99,14 +101,14 @@ Critter.prototype.tick = function() {
 		} else {
 			this.idleMove();
 		}
-		
-		if (ctxt.hunger > 400) {
-			this.environment.killCrit(this);
-		}
-		
 	} else {
 		this.idleMove();
 	}
+	
+	if (ctxt.hunger > 400 || ctxt.age > ctxt.dies_at) {
+		this.environment.killCrit(this);
+	}
+	
 };
 
 Critter.prototype.idleMove = function() {
@@ -135,6 +137,5 @@ Critter.prototype.distanceTo = function(other) {
 
 Critter.prototype.eat = function(other) {
 	this.hunger = 0;
-	console.log('death!');
 	this.environment.killCrit(other);
 };
