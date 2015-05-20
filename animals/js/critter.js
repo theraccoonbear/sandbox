@@ -100,7 +100,7 @@ Critter.prototype.tick = function() {
 			this.idleMove();
 		}
 		
-		if (ctxt.hunger > 100) {
+		if (ctxt.hunger > 400) {
 			this.environment.killCrit(this);
 		}
 		

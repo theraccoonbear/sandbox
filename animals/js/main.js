@@ -27,7 +27,7 @@ for (var i = 0; i < 200; i++) {
 
 	cfg.x = pos.x;
 	cfg.y = pos.y;
-	env.addCrit(new Critter(cfg));
+	env.addCrit(cfg);
 }
 
 //env.addCrit(new Critter());

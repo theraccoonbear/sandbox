@@ -19,15 +19,22 @@ Environment.prototype.init = function() {
 	this.stage.update();
 };
 
-Environment.prototype.addCrit = function(crit) {
+Environment.prototype.addCrit = function(cfg) {
 	var ctxt = this;
+	cfg.environment = this;
+	if (!cfg.x || !cfg.y) {
+		var pos = this.randomPosition();
+		cfg.x = pos.x;
+		cfg.y = pos.y;
+	}
+	var crit = new Critter(cfg);
 	crit.environment = this;
 	this.critters.push(crit);
 	this.stage.addChild(crit.getShape());
 };
 
 Environment.prototype.killCrit = function(crit) {
-	for (var i = 0, l = this.critters.length; i < l; i++) {
+	for (var i = this.critters.length - 1; i > 0; i--) {
 		if (this.critters[i].id == crit.id) {
 			this.stage.removeChild(crit.shape);
 			this.critters.splice(i, 1);
