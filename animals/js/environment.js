@@ -1,0 +1,63 @@
+var Environment = function(opts) {
+	opts = opts || {};
+	var ctxt = this;
+	
+	for (var p in opts) {
+		this[p] = opts[p];
+	}
+	
+	this.init();
+	
+};
+
+Environment.prototype.init = function() {
+	var ctxt = this;
+	this.critters = [];
+	this.stage = new createjs.Stage(this.stage_id);
+	createjs.Ticker.addEventListener("tick", function() { ctxt.tick(); });
+	createjs.Ticker.setInterval(25);
+	this.stage.update();
+};
+
+Environment.prototype.addCrit = function(crit) {
+	var ctxt = this;
+	crit.environment = this;
+	this.critters.push(crit);
+	this.stage.addChild(crit.getShape());
+};
+
+Environment.prototype.tick = function() {
+	var ctxt = this;
+	for (var i = 0, l = ctxt.critters.length; i < l; i++) {
+		var c = ctxt.critters[i];
+		c.tick();
+	}
+	this.stage.update();
+};
+
+Environment.prototype.randomPosition = function() {
+	var w = this.stage.canvas.width;
+	var h = this.stage.canvas.height;
+	return {
+		x: Math.round(Math.random() * w),
+		y: Math.round(Math.random() * h)
+	};
+};
+
+Environment.prototype.findAll = function(type, filter) {
+	var matches = [];
+	if (typeof type !== 'object' || !type.length) {
+		type = [type];
+	}
+	for (var i = 0, l = this.critters.length; i < l; i++) {
+		var c = this.critters[i];
+		for (var ti = 0, tl = type.length; ti < tl; ti++) {
+			if (type[ti] == c.type) {
+				matches.push(c);
+				break;
+			}
+		}
+	}
+	
+	return matches;
+};
