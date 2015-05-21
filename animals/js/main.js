@@ -18,7 +18,7 @@ env.init();
 
 
 
-for (var i = 0; i < 10; i++) {
+for (var i = 0; i < 100; i++) {
 	var pos = env.randomPosition();
 	var cfg = {};
 	if (Math.random() > 0.5) {
