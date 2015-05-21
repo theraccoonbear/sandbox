@@ -2,6 +2,9 @@ var Environment = function(opts) {
 	opts = opts || {};
 	var ctxt = this;
 	
+	this.capacity = 100;
+	this.paused = false;
+	
 	for (var p in opts) {
 		this[p] = opts[p];
 	}
@@ -9,6 +12,40 @@ var Environment = function(opts) {
 	this.ticking = false;
 	this.init();
 	
+};
+
+var clone = function(obj) {
+    var copy;
+
+    // Handle the 3 simple types, and null or undefined
+    if (null == obj || "object" != typeof obj) return obj;
+
+    // Handle Date
+    if (obj instanceof Date) {
+        copy = new Date();
+        copy.setTime(obj.getTime());
+        return copy;
+    }
+
+    // Handle Array
+    if (obj instanceof Array) {
+        copy = [];
+        for (var i = 0, len = obj.length; i < len; i++) {
+            copy[i] = clone(obj[i]);
+        }
+        return copy;
+    }
+
+    // Handle Object
+    if (obj instanceof Object) {
+        copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+        }
+        return copy;
+    }
+
+    throw new Error("Unable to copy obj! Its type isn't supported.");
 };
 
 Environment.prototype.init = function() {
@@ -25,16 +62,20 @@ Environment.prototype.start = function() {
 	createjs.Ticker.setInterval(25);
 };
 
+Environment.prototype.pause = function() {
+	this.paused = !this.paused;
+};
+
 Environment.prototype.addCrit = function(cfg) {
 	var ctxt = this;
+	cfg = cfg || {};
 	cfg.environment = this;
-	if (!cfg.x || !cfg.y) {
-		var pos = this.randomPosition();
-		cfg.x = pos.x;
-		cfg.y = pos.y;
-	}
+	//if (!cfg.x || !cfg.y) {
+	//	var pos = this.randomPosition();
+	//	cfg.x = pos.x;
+	//	cfg.y = pos.y;
+	//}
 	var crit = new Critter(cfg);
-	crit.environment = this;
 	this.critters.push(crit);
 	this.stage.addChild(crit.getShape());
 };
@@ -49,7 +90,7 @@ Environment.prototype.killCrit = function(crit) {
 };
 
 Environment.prototype.tick = function() {
-	if (this.ticking) {
+	if (this.ticking || this.paused) {
 		return;
 	}
 	this.ticking = true;
@@ -62,8 +103,11 @@ Environment.prototype.tick = function() {
 	
 	this.killEmAll();
 	
-	if (this.critters.length < 10) {
-		//this.addCrit(new Critter());
+	var this_round = 0;
+	while (false && this.critters.length < this.capacity && this_round++ < 5) {
+		var cfg = {};
+		if (Math.random() > 0.8) { cfg = CTypes.bug(); }
+		this.addCrit(cfg);
 	}
 	
 	this.stage.update();
@@ -82,14 +126,20 @@ Environment.prototype.killEmAll = function() {
 			return 0;
 		});
 		
-		//for (var i = this.kill_list.length - 1; i >= 0; i--) {
 		for (var i = 0, l = this.kill_list.length; i < l; i++) {
 			var crit = this.critters[this.kill_list[i]];
 			//this.stage.removeChild(crit.shape);
 			var stg_crit = this.stage.getChildByName(crit.id);
-			console.log(crit.shape == stg_crit, crit, stg_crit);
-			this.stage.removeChild(stg_crit);
-			this.critters.splice(i, 1);
+			
+			// why are we sometimes not finding the right critter?
+			//console.log('removing ' + crit.id, 'found? ', crit.shape == stg_crit);
+			if (crit.shape != stg_crit) {
+				debugger;
+			}
+			this.stage.removeChild(crit.shape);
+			stg_crit = null;
+			
+			this.critters.splice(this.kill_list[i], 1);
 			//console.log('kill', i);
 		}
 		//console.log('----------');
@@ -98,12 +148,15 @@ Environment.prototype.killEmAll = function() {
 };
 
 Environment.prototype.randomPosition = function() {
-	var w = this.stage.canvas.width;
-	var h = this.stage.canvas.height;
+	var dims = this.dimensions();
 	return {
-		x: Math.round(Math.random() * w),
-		y: Math.round(Math.random() * h)
+		x: Math.round(Math.random() * dims.w),
+		y: Math.round(Math.random() * dims.h)
 	};
+};
+
+Environment.prototype.dimensions = function() {
+	return {w: this.stage.canvas.width, h: this.stage.canvas.height};
 };
 
 Environment.prototype.findAll = function(type, filter) {
