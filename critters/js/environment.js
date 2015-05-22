@@ -54,6 +54,9 @@ Environment.prototype.init = function() {
 	this.kill_list = [];
 	this.ticking = false;
 	this.stage = new createjs.Stage(this.stage_id);
+	this.stage.on("stagemouseup", function(evt) {
+		ctxt.addCrit({x: evt.stageX, y: evt.stageY});
+	})
 };
 
 Environment.prototype.start = function() {
@@ -128,16 +131,19 @@ Environment.prototype.killEmAll = function() {
 		
 		for (var i = 0, l = this.kill_list.length; i < l; i++) {
 			var crit = this.critters[this.kill_list[i]];
-			//this.stage.removeChild(crit.shape);
-			var stg_crit = this.stage.getChildByName(crit.id);
-			
-			// why are we sometimes not finding the right critter?
-			//console.log('removing ' + crit.id, 'found? ', crit.shape == stg_crit);
-			if (crit.shape != stg_crit) {
+			if (!crit || !crit.shape || typeof crit.shape === 'undefined') {
 				debugger;
 			}
 			this.stage.removeChild(crit.shape);
-			stg_crit = null;
+			//var stg_crit = this.stage.getChildByName(crit.id);
+			
+			// why are we sometimes not finding the right critter?
+			//console.log('removing ' + crit.id, 'found? ', crit.shape == stg_crit);
+			//if (crit.shape != stg_crit) {
+			//	debugger;
+			//}
+			//this.stage.removeChild(crit.shape);
+			//stg_crit = null;
 			
 			this.critters.splice(this.kill_list[i], 1);
 			//console.log('kill', i);

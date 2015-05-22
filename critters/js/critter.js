@@ -11,6 +11,7 @@ var CTypes = {
 			eats: ['microbe'],
 			flight: true,
 			height: 1,
+			asexual: false,
 			vis_distance: 250,
 			getShape: function(o) {
 				var colors = ['#000000', '#222222', '#444444', '#666666'];
@@ -37,6 +38,7 @@ var Critter = function(opts) {
 		age: 0,
 		vitality: 10,
 		hunger: 0,
+		hunger_threshold: 500,
 		matures_at: 100,
 		spawn_rate: 100,
 		dies_at: 1000,
@@ -46,6 +48,7 @@ var Critter = function(opts) {
 		flight: false,
 		aquatic: true,
 		vis_distance: 100,
+		asexual: false,
 		environment: null,
 		eats: ['nutrient'], //['animal', 'plant', 'bug', 'microbe', 'nutrient'],
 		waypoint: {
@@ -66,7 +69,7 @@ var Critter = function(opts) {
 		}
 	};
 	
-	this.id = (Math.random() * 100000000).toString().replace(/[^0-9]/, '');
+	this.id = Math.random() * Date.now();
 	
 	for (var p in _defaults) {
 		this[p] = opts[p] || _defaults[p];
@@ -80,42 +83,13 @@ var Critter = function(opts) {
 	this.speed = this.speed * (1 + (Math.random() * 0.1));
 };
 
+Critter.heritable = ['speed', 'height', 'vis_distance', 'vitality', 'hunger_threshold'];
 
 Critter.prototype.nearestFood = function() {
-	//var foods = this.environment.findAll(this.eats);
-	//if (foods.length == 0) {
-	//	return false;
-	//}
-	//var near_dist = 10000000000;
-	//var near_idx = 0;
-	//for (var i = 0, l = foods.length; i < l; i++) {
-	//	var dist = this.distanceTo(foods[i]);
-	//	if (dist < near_dist && dist < this.vis_distance) {
-	//		near_dist = dist;
-	//		near_idx = i;
-	//	}
-	//}
-	//return foods[near_idx];
 	return this.nearestX(this.eats);
 };
 
-Critter.prototype.nearestMate = function() {
-	//var mates = this.environment.findAll(this.type);
-	//if (mates.length == 0) {
-	//	return false;
-	//}
-	//var near_dist = 10000000000;
-	//var near_idx = 0;
-	//for (var i = 0, l = mates.length; i < l; i++) {
-	//	var dist = this.distanceTo(mates[i]);
-	//	if (dist < near_dist && dist < this.vis_distance) {
-	//		near_dist = dist;
-	//		near_idx = i;
-	//	}
-	//}
-	//return mates[near_idx];
-	return this.nearestX(this.type);
-};
+
 
 Critter.prototype.nearestX = function(x) {
 	var targets = this.environment.findAll(x);
@@ -141,17 +115,36 @@ Critter.prototype.tick = function() {
 	
 	this.waypoint = this.vectorTowards(this.environment.randomPosition());
 	
-	if (ctxt.hunger > 100) {
-		food = ctxt.nearestFood();
-		if (food) {
-			var dist = this.distanceTo(food);
+	if (this.age > this.matures_at && this.type == 'bug') {
+		debugger;
+	}
+	
+	if (!this.asexual && this.type != 'microbe' && this.age > this.matures_at && this.age - this.last_spawn > this.spawn_rate) {
+		var mate = ctxt.nearestMate();
+		if (mate) {
+			var dist = this.distanceTo(mate);
 			if (dist < this.speed) {
-				this.eat(food);
+				this.mateWith(mate);
 			} else {
-				this.waypoint = this.vectorTowards(food);
+				this.waypoint = this.vectorTowards(mate);
+			}
+		}
+	} else if (ctxt.hunger > 100) {
+		if (this.eats[0] == 'nutrient') { // poop as nutrients?
+			this.hunger = 0;
+		} else {
+			var food = ctxt.nearestFood();
+			if (food) {
+				var dist = this.distanceTo(food);
+				if (dist < this.speed) {
+					this.eat(food);
+				} else {
+					this.waypoint = this.vectorTowards(food);
+				}
 			}
 		}
 	}
+
 	
 	this.shape.x += this.waypoint.x;
 	this.shape.y += this.waypoint.y;
@@ -169,22 +162,47 @@ Critter.prototype.tick = function() {
 		this.shape.y = dims.h;
 	}
 	
-	if (this.age > this.matures_at && this.last_spawn == 0) { //this.age - this.last_spawn > this.spawn_rate) {
-		//this.spawn();
-	}
 	
 	
-	if (ctxt.hunger > 1000) {
-		this.environment.killCrit(this);
+	
+	if (ctxt.hunger > ctxt.hunger_threshold) {
+		this.vitality--;
+		if (this.vitality < 1) {
+			console.log(this.type + " died of hunger");
+			this.environment.killCrit(this);
+		}
+		
 	} else if (ctxt.age > ctxt.dies_at) {
-		this.environment.killCrit(this);
+		//console.log(this.type + " died of old age");
+		//this.environment.killCrit(this);
 	}
 };
 
 
+Critter.prototype.nearestMate = function() {
+	return this.nearestX(this.type);
+};
 
-Critter.prototype.spawn = function() {
-	var cfg = jQuery.extend(true, {}, this);//clone(this);
+Critter.prototype.receptive = function() {
+	return (this.age >= this.matures_at && this.age - this.last_spawn >= this.spawn_rate);
+};
+
+Critter.prototype.mateWith = function(mate) {
+	var cfg = CTypes.bug();
+	for (var i = 0, l = Critter.heritable.length; i < l; i++) {
+		var trait = Critter.heritable[i];
+		cfg[trait] = ((mate[trait] + this[trait]) / 2) * (((Math.random() * 0.1) - 0.05) + 1); // averaged + genetic drift
+	}
+	cfg.x = (mate.shape.x + this.shape.x) / 2;
+	cfg.y = (mate.shape.y + this.shape.y) / 2;
+	this.last_spawn = this.age;
+	mate.last_spawn = mate.age;
+	console.log(this.type + ' reproduced', cfg);
+	this.environment.addCrit(cfg);
+};
+
+Critter.prototype.emitSpawn = function() {
+	var cfg = jQuery.extend(true, {}, this);
 	delete cfg.age;
 	delete cfg.hunger;
 	delete cfg.id;
@@ -195,7 +213,6 @@ Critter.prototype.spawn = function() {
 	this.last_spawn = this.age;
 	console.log('spawned', cfg);
 };
-
 
 Critter.prototype.idleMove = function() {
 	this.shape.x += Math.round(Math.random() * 10) - 5;

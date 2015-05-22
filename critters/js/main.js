@@ -13,7 +13,7 @@ var stage = document.getElementById('stage');
 stage.width = w;
 stage.height = h;
 
-var env = new Environment({stage_id: 'stage', capacity: 500});
+var env = new Environment({stage_id: 'stage', capacity: 200});
 
 env.init();
 
