@@ -5,7 +5,7 @@ var CTypes = {
 			speed: 3,
 			vitality: 100,
 			matures_at: 500,
-			spawn_rate: 50,
+			spawn_rate: 500,
 			diest_at: 5000,
 			type: 'bug',
 			eats: ['microbe'],
@@ -119,17 +119,7 @@ Critter.prototype.tick = function() {
 		debugger;
 	}
 	
-	if (!this.asexual && this.type != 'microbe' && this.age > this.matures_at && this.age - this.last_spawn > this.spawn_rate) {
-		var mate = ctxt.nearestMate();
-		if (mate) {
-			var dist = this.distanceTo(mate);
-			if (dist < this.speed) {
-				this.mateWith(mate);
-			} else {
-				this.waypoint = this.vectorTowards(mate);
-			}
-		}
-	} else if (ctxt.hunger > 100) {
+	if (ctxt.hunger > 100) {
 		if (this.eats[0] == 'nutrient') { // poop as nutrients?
 			this.hunger = 0;
 		} else {
@@ -143,6 +133,18 @@ Critter.prototype.tick = function() {
 				}
 			}
 		}
+	} else if (this.age > this.matures_at && this.age - this.last_spawn > this.spawn_rate) {
+		var mate = this.asexual ? this : ctxt.nearestMate();
+		if (mate) {
+			var dist = this.distanceTo(mate);
+			if (dist < this.speed) {
+				this.mateWith(mate);
+			} else {
+				this.waypoint = this.vectorTowards(mate);
+			}
+		}
+	} else {
+		
 	}
 
 	
@@ -188,7 +190,7 @@ Critter.prototype.receptive = function() {
 };
 
 Critter.prototype.mateWith = function(mate) {
-	var cfg = CTypes.bug();
+	var cfg = this.type == 'bug' ? CTypes.bug() : {};
 	for (var i = 0, l = Critter.heritable.length; i < l; i++) {
 		var trait = Critter.heritable[i];
 		cfg[trait] = ((mate[trait] + this[trait]) / 2) * (((Math.random() * 0.1) - 0.05) + 1); // averaged + genetic drift
@@ -243,7 +245,6 @@ Critter.prototype.distanceTo = function(other) {
 };
 
 Critter.prototype.eat = function(other) {
-	this.hunger = 0;
-	//console.log(this.id + ' ate ' + other.id);
+	this.hunger -= other.vitality * 3;
 	this.environment.killCrit(other);
 };
