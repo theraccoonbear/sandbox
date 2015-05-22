@@ -82,37 +82,56 @@ var Critter = function(opts) {
 
 
 Critter.prototype.nearestFood = function() {
-	var foods = this.environment.findAll(this.eats);
-	if (foods.length == 0) {
-		return false;
-	}
-	var near_dist = 10000000000;
-	var near_idx = 0;
-	for (var i = 0, l = foods.length; i < l; i++) {
-		var dist = this.distanceTo(foods[i]);
-		if (dist < near_dist && dist < this.vis_distance) {
-			near_dist = dist;
-			near_idx = i;
-		}
-	}
-	return foods[near_idx];
+	//var foods = this.environment.findAll(this.eats);
+	//if (foods.length == 0) {
+	//	return false;
+	//}
+	//var near_dist = 10000000000;
+	//var near_idx = 0;
+	//for (var i = 0, l = foods.length; i < l; i++) {
+	//	var dist = this.distanceTo(foods[i]);
+	//	if (dist < near_dist && dist < this.vis_distance) {
+	//		near_dist = dist;
+	//		near_idx = i;
+	//	}
+	//}
+	//return foods[near_idx];
+	return this.nearestX(this.eats);
 };
 
 Critter.prototype.nearestMate = function() {
-	var mates = this.environment.findAll(this.type);
-	if (mates.length == 0) {
+	//var mates = this.environment.findAll(this.type);
+	//if (mates.length == 0) {
+	//	return false;
+	//}
+	//var near_dist = 10000000000;
+	//var near_idx = 0;
+	//for (var i = 0, l = mates.length; i < l; i++) {
+	//	var dist = this.distanceTo(mates[i]);
+	//	if (dist < near_dist && dist < this.vis_distance) {
+	//		near_dist = dist;
+	//		near_idx = i;
+	//	}
+	//}
+	//return mates[near_idx];
+	return this.nearestX(this.type);
+};
+
+Critter.prototype.nearestX = function(x) {
+	var targets = this.environment.findAll(x);
+	if (targets.length == 0) {
 		return false;
 	}
 	var near_dist = 10000000000;
 	var near_idx = 0;
-	for (var i = 0, l = mates.length; i < l; i++) {
-		var dist = this.distanceTo(mates[i]);
+	for (var i = 0, l = targets.length; i < l; i++) {
+		var dist = this.distanceTo(targets[i]);
 		if (dist < near_dist && dist < this.vis_distance) {
 			near_dist = dist;
 			near_idx = i;
 		}
 	}
-	return mates[near_idx];
+	return targets[near_idx];
 };
 
 Critter.prototype.tick = function() {
@@ -190,6 +209,10 @@ Critter.prototype.vectorTowards = function(other) {
 	var angle = Math.atan(delta_y/delta_x);
 	var tick_x = Math.cos(angle) * this.speed;
 	var tick_y = Math.sin(angle) * this.speed;
+	
+	if (delta_x > 0) { tick_x = -tick_x; }
+	if (delta_y > 0) { tick_y = -tick_y; }
+	
 	return {
 		x: tick_x,
 		y: tick_y
