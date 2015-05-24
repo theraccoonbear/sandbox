@@ -13,13 +13,13 @@ var stage = document.getElementById('stage');
 stage.width = w;
 stage.height = h;
 
-var env = new Environment({stage_id: 'stage', capacity: 200});
+var env = new Environment({stage_id: 'stage', capacity: 100});
 
 env.init();
 
 for (var i = 0; i < env.capacity; i++) {
 	var cfg = {};
-	if (Math.random() > 0.6) { cfg = CTypes.bug(); }
+	if (Math.random() > 0.8) { cfg = CTypes.bug(); }
 	env.addCrit(cfg);
 }
 

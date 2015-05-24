@@ -5,7 +5,7 @@ var CTypes = {
 			speed: 3,
 			vitality: 100,
 			matures_at: 500,
-			spawn_rate: 500,
+			spawn_rate: 300,
 			diest_at: 5000,
 			type: 'bug',
 			eats: ['microbe'],
@@ -37,10 +37,10 @@ var Critter = function(opts) {
 		speed: 1,
 		age: 0,
 		vitality: 10,
-		hunger: 0,
+		hunger: 100,
 		hunger_threshold: 500,
-		matures_at: 100,
-		spawn_rate: 100,
+		matures_at: 200,
+		spawn_rate: 150,
 		dies_at: 1000,
 		type: 'microbe',
 		last_spawn: 0,
@@ -63,8 +63,8 @@ var Critter = function(opts) {
 			this.shape = new createjs.Shape();
 			this.shape.name = this.id;
 			this.shape.graphics.beginFill(c).drawCircle(0, 0, 2);
-			this.shape.x = ctxt.x;
-			this.shape.y = ctxt.y;
+			this.shape.x = this.x;
+			this.shape.y = this.y;
 			return this.shape;
 		}
 	};
@@ -100,7 +100,7 @@ Critter.prototype.nearestX = function(x) {
 	var near_idx = 0;
 	for (var i = 0, l = targets.length; i < l; i++) {
 		var dist = this.distanceTo(targets[i]);
-		if (dist < near_dist && dist < this.vis_distance) {
+		if (targets[i].id != this.id && dist < near_dist && dist < this.vis_distance) {
 			near_dist = dist;
 			near_idx = i;
 		}
@@ -113,27 +113,13 @@ Critter.prototype.tick = function() {
 	ctxt.age++;
 	ctxt.hunger++;
 	
-	this.waypoint = this.vectorTowards(this.environment.randomPosition());
+	this.waypoint = false; 
 	
 	if (this.age > this.matures_at && this.type == 'bug') {
-		debugger;
+		//debugger;
 	}
 	
-	if (ctxt.hunger > 100) {
-		if (this.eats[0] == 'nutrient') { // poop as nutrients?
-			this.hunger = 0;
-		} else {
-			var food = ctxt.nearestFood();
-			if (food) {
-				var dist = this.distanceTo(food);
-				if (dist < this.speed) {
-					this.eat(food);
-				} else {
-					this.waypoint = this.vectorTowards(food);
-				}
-			}
-		}
-	} else if (this.age > this.matures_at && this.age - this.last_spawn > this.spawn_rate) {
+	if (this.age > this.matures_at && this.age - this.last_spawn > this.spawn_rate) {
 		var mate = this.asexual ? this : ctxt.nearestMate();
 		if (mate) {
 			var dist = this.distanceTo(mate);
@@ -143,10 +129,13 @@ Critter.prototype.tick = function() {
 				this.waypoint = this.vectorTowards(mate);
 			}
 		}
-	} else {
-		
-	}
+	} 
 
+	if (this.waypoint === false) {
+		this.feed();
+		//var r_pos = this.environment.randomPosition();
+		//this.waypoint = this.vectorTowards(r_pos);
+	}
 	
 	this.shape.x += this.waypoint.x;
 	this.shape.y += this.waypoint.y;
@@ -180,6 +169,26 @@ Critter.prototype.tick = function() {
 	}
 };
 
+Critter.prototype.feed = function() {
+	if (this.eats[0] == 'nutrient') { // poop as nutrients?
+		//this.waypoint = this.vectorTowards(this.nearestMate());
+		this.waypoint = this.vectorTowards(this.environment.randomPosition());
+		this.hunger = 0;
+	} else {
+		var food = this.nearestFood();
+		if (food) {
+			var dist = this.distanceTo(food);
+			if (dist < this.speed) {
+				this.waypoint = this.vectorTowards(this.environment.randomPosition());
+				this.eat(food);
+			} else {
+				this.waypoint = this.vectorTowards(food);
+			}
+		} else {
+			this.waypoint = this.vectorTowards(this.environment.randomPosition());
+		}
+	}
+};
 
 Critter.prototype.nearestMate = function() {
 	return this.nearestX(this.type);
@@ -199,7 +208,7 @@ Critter.prototype.mateWith = function(mate) {
 	cfg.y = (mate.shape.y + this.shape.y) / 2;
 	this.last_spawn = this.age;
 	mate.last_spawn = mate.age;
-	console.log(this.type + ' reproduced', cfg);
+	//console.log(this.type + ' reproduced', cfg);
 	this.environment.addCrit(cfg);
 };
 
@@ -224,8 +233,10 @@ Critter.prototype.idleMove = function() {
 Critter.prototype.vectorTowards = function(other) {
 	var delta_x = other.shape ? this.shape.x - other.shape.x : this.shape.x - other.x;
 	var delta_y = other.shape ? this.shape.y - other.shape.y : this.shape.y - other.y;
+
+	//debugger;
 	
-	var angle = Math.atan(delta_y/delta_x);
+	var angle = Math.atan(delta_y / delta_x);
 	var tick_x = Math.cos(angle) * this.speed;
 	var tick_y = Math.sin(angle) * this.speed;
 	
@@ -237,6 +248,14 @@ Critter.prototype.vectorTowards = function(other) {
 		y: tick_y
 	};
 };
+
+Critter.prototype.coords = function() {
+	return this.x + ', ' + this.y;
+}
+
+Critter.prototype.destination = function() {
+	return this.waypoint.x + ', ' + this.waypoint.y;
+}
 
 Critter.prototype.distanceTo = function(other) {
 	var delta_x = this.shape.x - other.shape.x;

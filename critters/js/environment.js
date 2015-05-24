@@ -14,40 +14,6 @@ var Environment = function(opts) {
 	
 };
 
-var clone = function(obj) {
-    var copy;
-
-    // Handle the 3 simple types, and null or undefined
-    if (null == obj || "object" != typeof obj) return obj;
-
-    // Handle Date
-    if (obj instanceof Date) {
-        copy = new Date();
-        copy.setTime(obj.getTime());
-        return copy;
-    }
-
-    // Handle Array
-    if (obj instanceof Array) {
-        copy = [];
-        for (var i = 0, len = obj.length; i < len; i++) {
-            copy[i] = clone(obj[i]);
-        }
-        return copy;
-    }
-
-    // Handle Object
-    if (obj instanceof Object) {
-        copy = {};
-        for (var attr in obj) {
-            if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
-        }
-        return copy;
-    }
-
-    throw new Error("Unable to copy obj! Its type isn't supported.");
-};
-
 Environment.prototype.init = function() {
 	var ctxt = this;
 	this.critters = [];
@@ -73,11 +39,6 @@ Environment.prototype.addCrit = function(cfg) {
 	var ctxt = this;
 	cfg = cfg || {};
 	cfg.environment = this;
-	//if (!cfg.x || !cfg.y) {
-	//	var pos = this.randomPosition();
-	//	cfg.x = pos.x;
-	//	cfg.y = pos.y;
-	//}
 	var crit = new Critter(cfg);
 	this.critters.push(crit);
 	this.stage.addChild(crit.getShape());
@@ -85,7 +46,7 @@ Environment.prototype.addCrit = function(cfg) {
 
 Environment.prototype.killCrit = function(crit) {
 	for (var i = 0, l = this.critters.length; i < l; i++) {
-		if (this.critters[i].id == crit.id) {
+		if (this.critters[i].id == crit.id && !this.kill_list.indexOf(i) >= 0) {
 			this.kill_list.push(i);
 			break;
 		}
@@ -132,12 +93,11 @@ Environment.prototype.killEmAll = function() {
 		for (var i = 0, l = this.kill_list.length; i < l; i++) {
 			var crit = this.critters[this.kill_list[i]];
 			if (!crit || typeof crit === 'undefined' || !crit.shape || typeof crit.shape === 'undefined') {
-				debugger;
+				//debugger;
+			} else {
+				this.stage.removeChild(crit.shape);
+				this.critters.splice(this.kill_list[i], 1);
 			}
-			//console.log(crit);
-			//console.log(crit.shape);
-			this.stage.removeChild(crit.shape);
-			this.critters.splice(this.kill_list[i], 1);
 		}
 		this.kill_list = [];
 	}
