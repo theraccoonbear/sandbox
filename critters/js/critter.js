@@ -39,7 +39,7 @@ var Critter = function(opts) {
 		vitality: 10,
 		hunger: 100,
 		hunger_threshold: 500,
-		matures_at: 200,
+		matures_at: 100,
 		spawn_rate: 150,
 		dies_at: 1000,
 		type: 'microbe',
@@ -131,6 +131,7 @@ Critter.prototype.tick = function() {
 		}
 	} 
 
+	this.feed();
 	if (this.waypoint === false) {
 		this.feed();
 		//var r_pos = this.environment.randomPosition();

@@ -25,6 +25,22 @@ Environment.prototype.init = function() {
 	})
 };
 
+Environment.buildPopulation = function() {
+	for (var i = 0; i < this.capacity; i++) {
+		var cfg = {};
+		if (Math.random() > 0.90) { cfg = CTypes.bug(); }
+		this.addCrit(cfg);
+	}
+};
+
+Environment.prototype.reset = function() {
+	for (var i = 0, l = this.critters.length; i < l; i++) {
+		this.kill_list.push(i);
+	}
+	this.killEmAll();
+	this.init();
+};
+
 Environment.prototype.start = function() {
 	var ctxt = this;
 	createjs.Ticker.addEventListener("tick", function() { ctxt.tick(); });
