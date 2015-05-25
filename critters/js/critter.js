@@ -1,3 +1,121 @@
+var CritterFactory = (function() {
+	
+	var cf = {};
+	
+	(function() {
+		var _product_line = {};
+		cf.register = function(name, ctr) {
+			_product_line[name] = ctr;
+		};
+		
+		cf.defined = function(name) {
+			return typeof _product_line[name] !== 'undefined';
+		};
+		
+		cf.produce = function(name, opts) {
+			if (this.defined(name)) {
+				opts = opts || {};
+				opts.environment = Environment;
+				return new _product_line[name](opts)
+			} else {
+				throw new Error("Undefined critter: " + name);
+			}
+		};
+	})();
+	
+	return cf;
+})();
+
+var CritterClass = Class.extend({
+	speed: 1,
+	max_speed: 1,
+	age: 0,
+	vitality: 10,
+	hunger: 100,
+	hunger_threshold: 500,
+	matures_at: 100,
+	spawn_rate: 150,
+	dies_at: 1000,
+	max_age: 1000,
+	type: 'microbe',
+	last_spawn: 0,
+	height: 0,
+	flight: false,
+	aquatic: true,
+	vis_distance: 100,
+	asexual: true,
+	environment: null,
+	children: [],
+	eats: ['nutrient'], //['animal', 'plant', 'bug', 'microbe', 'nutrient'],
+	waypoint: {
+		x: 0,
+		y: 0
+	},
+	
+	getShape: function(o) {
+		var colors = ['red', 'green', 'blue'];
+		
+		var c = colors[Math.floor(Math.random() * colors.length)]
+		
+		this.shape = new createjs.Container();
+		
+		this.shape.name = this.id;
+		this.shape.parent = this;
+		
+		this.figure = new createjs.Shape();
+		this.figure.graphics.beginFill(c).drawCircle(0, 0, 2);
+		this.shape.x = this.x;
+		this.shape.y = this.y;
+		return this.shape;
+	},
+	
+	constructor: function(opts) {
+		opts = opts || {};
+		
+		if (!CritterFactory.defined(opts.name)) {
+			CritterFactory.register(opts.name, this.constructor);
+		}
+		
+		this.id = Math.random() * Date.now();
+		
+		for (var p in this) {
+			if (typeof p !== 'function' && this.hasOwnProperty(p)) {
+				this[p] = opts[p] || this[p];
+			}
+		}
+		
+		//var pos = this.environment.randomPosition();
+		//this.x = opts.x || pos.x;
+		//this.y = opts.y || pos.y;
+		
+		this.dies_at = this.max_age * (1 - (Math.random() * 0.2));
+		this.speed = this.speed * (1 + (Math.random() * 0.1));
+	},
+	
+	_xyz: null
+});
+
+var MicrobeClass = CritterClass.extend({
+	constructor: function(opts) {
+		opts = opts || {};
+		opts.name = 'microbe';
+		MicrobeClass.super.constructor.call(this, opts);
+	},
+	
+	_xyz: null
+});
+
+var BugClass = CritterClass.extend({
+	constructor: function(opts) {
+		opts = opts || {};
+		opts.name = 'bug';
+		MicrobeClass.super.constructor.call(this, opts);
+	},
+	
+	_xyz: null
+});
+
+var mc = new MicrobeClass();
 
 var CTypes = {
 	'bug': function() {
@@ -14,6 +132,7 @@ var CTypes = {
 			asexual: false,
 			vis_distance: 250,
 			getShape: function(o) {
+				var ctxt = this;
 				var colors = ['#000000', '#222222', '#444444', '#666666'];
 				
 				var c = colors[Math.floor(Math.random() * colors.length)]
@@ -23,6 +142,10 @@ var CTypes = {
 				this.shape.graphics.beginFill(c).drawEllipse(0, 0, 10, 5);
 				this.shape.x = this.x;
 				this.shape.y = this.y;
+				this.shape.on('click', function() {
+					console.log(ctxt);
+					ctxt.environment.watch_id = ctxt.id;
+				});
 				return this.shape;
 			}
 		};
@@ -50,6 +173,7 @@ var Critter = function(opts) {
 		vis_distance: 100,
 		asexual: false,
 		environment: null,
+		children: [],
 		eats: ['nutrient'], //['animal', 'plant', 'bug', 'microbe', 'nutrient'],
 		waypoint: {
 			x: 0,
@@ -131,7 +255,7 @@ Critter.prototype.tick = function() {
 		}
 	} 
 
-	this.feed();
+	//this.feed();
 	if (this.waypoint === false) {
 		this.feed();
 		//var r_pos = this.environment.randomPosition();
@@ -209,21 +333,9 @@ Critter.prototype.mateWith = function(mate) {
 	cfg.y = (mate.shape.y + this.shape.y) / 2;
 	this.last_spawn = this.age;
 	mate.last_spawn = mate.age;
-	//console.log(this.type + ' reproduced', cfg);
-	this.environment.addCrit(cfg);
-};
-
-Critter.prototype.emitSpawn = function() {
-	var cfg = jQuery.extend(true, {}, this);
-	delete cfg.age;
-	delete cfg.hunger;
-	delete cfg.id;
-	delete cfg.last_spawn;
-	cfg.x += (Math.random() * 30) - 15;
-	cfg.y += (Math.random() * 30) - 15;
-	this.environment.addCrit(cfg);
-	this.last_spawn = this.age;
-	console.log('spawned', cfg);
+	var spawn = this.environment.addCrit(cfg);
+	this.children.push(spawn);
+	mate.children.push(spawn);
 };
 
 Critter.prototype.idleMove = function() {

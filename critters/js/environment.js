@@ -19,6 +19,7 @@ Environment.prototype.init = function() {
 	this.critters = [];
 	this.kill_list = [];
 	this.ticking = false;
+	this.watch_id = false;
 	this.stage = new createjs.Stage(this.stage_id);
 	this.stage.on("stagemouseup", function(evt) {
 		ctxt.addCrit({x: evt.stageX, y: evt.stageY});
@@ -58,6 +59,7 @@ Environment.prototype.addCrit = function(cfg) {
 	var crit = new Critter(cfg);
 	this.critters.push(crit);
 	this.stage.addChild(crit.getShape());
+	return crit;
 };
 
 Environment.prototype.killCrit = function(crit) {
@@ -78,6 +80,9 @@ Environment.prototype.tick = function() {
 	var ctxt = this;
 	for (var i = 0, l = ctxt.critters.length; i < l; i++) {
 		var c = ctxt.critters[i];
+		if (c.id == this.watch_id) {
+			debugger;
+		}
 		c.tick();
 	}
 	
