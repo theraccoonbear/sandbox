@@ -271,6 +271,7 @@ var MicrobeClass = CritterClass.extend({
 		this.figure = new createjs.Shape();
 		this.figure.graphics.beginFill(c).drawCircle(0, 0, 2);
 		this.shape.addChild(this.figure);
+		this.shape.cache(-2, -2, 4, 4);
 		this.shape.x = this.x;
 		this.shape.y = this.y;
 		return this.shape;
@@ -309,6 +310,7 @@ var BugClass = CritterClass.extend({
 		this.shape = new createjs.Shape();
 		this.shape.name = this.id;
 		this.shape.graphics.beginFill(c).drawEllipse(0, 0, 10, 5);
+		this.shape.cache(-10, -5, 20, 10);
 		this.shape.x = this.x;
 		this.shape.y = this.y;
 		this.shape.on('click', function() {
