@@ -14,18 +14,18 @@ var CritterFactory = (function() {
 		cf.produce = function(name, opts) {
 			if (this.defined(name)) {
 				opts = opts || {};
-				opts.environment = CritterFactory.environment;
+				//opts.environment = CritterFactory.environment;
 				return new _product_line[name](opts)
 			} else {
 				throw new Error("Undefined critter: " + name);
 			}
 		};
+		
+		cf.environment = false;
 	})();
 	
 	return cf;
 })();
-
-CritterFactory.environment = {};
 
 var CritterClass = Class.extend({
 	speed: 1,
@@ -41,6 +41,8 @@ var CritterClass = Class.extend({
 	type: 'microbe',
 	last_spawn: 0,
 	height: 0,
+	x: false,
+	y: false,
 	flight: false,
 	aquatic: true,
 	vis_distance: 100,
@@ -56,21 +58,17 @@ var CritterClass = Class.extend({
 	constructor: function(opts) {
 		opts = opts || {};
 		
-		//if (!CritterFactory.defined(opts.name)) {
-		//	CritterFactory.register(opts.name, this.constructor);
-		//}
-		
 		this.id = Math.random() * Date.now();
 		
 		for (var p in this) {
-			if (typeof p !== 'function' && this.hasOwnProperty(p)) {
-				this[p] = opts[p] || this[p];
-			}
+			//if (typeof p !== 'function' && this.hasOwnProperty(p)) {
+			this[p] = opts[p] || this[p];
+			//}
 		}
 		
-		//var pos = this.environment.randomPosition();
-		//this.x = opts.x || pos.x;
-		//this.y = opts.y || pos.y;
+		var pos = this.environment.randomPosition();
+		if (!this.x) { this.x = pos.x; }
+		if (!this.y) { this.y = pos.y; }
 		
 		this.dies_at = this.max_age * (1 - (Math.random() * 0.2));
 		this.speed = this.speed * (1 + (Math.random() * 0.1));
