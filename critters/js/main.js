@@ -1,10 +1,3 @@
-//$(function() {	
-//	$('[id]').each(function(i, e) {
-//		var $e = $(e);
-//		var id = $e.attr('id');
-//		window['$' + id] = $e;
-//	});	
-//});
 
 
 var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
@@ -24,12 +17,21 @@ CritterFactory.environment = new EnvironmentClass({
 CritterFactory.environment.init();
 CritterFactory.environment.start();
 
-//for (var i = 0; i < env.capacity; i++) {
-//	var cfg = {};
-//	if (Math.random() > 0.90) { cfg = CTypes.bug(); }
-//	env.addCrit(cfg);
-//}
 
-
-
-
+$(function() {	
+	$('[id]').each(function(i, e) {
+		var $e = $(e);
+		var id = $e.attr('id');
+		window['$' + id] = $e;
+	});
+	
+	$btnPause.on('click', function(e) {
+		CritterFactory.environment.pause();
+		$btnPause.val(CritterFactory.environment.paused ? 'Resume' : 'Pause');
+	});
+	
+	$btnReset.on('click', function(e) {
+		CritterFactory.environment.reset();
+	});
+	
+});
