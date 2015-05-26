@@ -7,17 +7,17 @@
 //});
 
 
-//var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-//var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-//var stage = document.getElementById('stage');
-//stage.width = w;
-//stage.height = h;
+var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+var stage = document.getElementById('stage');
+stage.width = w;
+stage.height = h;
 
 CritterFactory.environment = new EnvironmentClass({
 	stage_id: 'stage',
 	capacity: 300,
 	initial_population: {
-		20: 'bug'
+		15: 'bug'
 	}
 });
 

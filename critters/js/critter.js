@@ -111,7 +111,7 @@ var CritterClass = Class.extend({
 			if (mate) {
 				var dist = this.distanceTo(mate);
 				if (dist < this.speed) {
-					this.mateWith(mate);
+					this.tryToMateWith(mate);
 				} else {
 					this.waypoint = this.vectorTowards(mate);
 				}
@@ -186,14 +186,12 @@ var CritterClass = Class.extend({
 		return (this.age >= this.matures_at && this.age - this.last_spawn >= this.spawn_rate);
 	},
 	
-	mateWith: function(mate) {
-		//var cfg = this.type == 'bug' ? CTypes.bug() : {};
-		//for (var i = 0, l = Critter.heritable.length; i < l; i++) {
-		//	var trait = Critter.heritable[i];
-		//	cfg[trait] = ((mate[trait] + this[trait]) / 2) * (((Math.random() * 0.1) - 0.05) + 1); // averaged + genetic drift
-		//}
-		//cfg.x = (mate.shape.x + this.shape.x) / 2;
-		//cfg.y = (mate.shape.y + this.shape.y) / 2;
+	tryToMateWith: function(mate) {
+		if (Math.random() > 0.5) { // "try" to mate with
+			this.last_spawn = this.age;
+			return;
+		}
+		
 		opts = {
 			x: (mate.shape.x + this.shape.x) / 2,
 			y: (mate.shape.y + this.shape.y) / 2	
@@ -463,7 +461,7 @@ CritterFactory.register('bug', BugClass);
 //		if (mate) {
 //			var dist = this.distanceTo(mate);
 //			if (dist < this.speed) {
-//				this.mateWith(mate);
+//				this.tryToMateWith(mate);
 //			} else {
 //				this.waypoint = this.vectorTowards(mate);
 //			}
@@ -538,7 +536,7 @@ CritterFactory.register('bug', BugClass);
 //	return (this.age >= this.matures_at && this.age - this.last_spawn >= this.spawn_rate);
 //};
 //
-//Critter.prototype.mateWith = function(mate) {
+//Critter.prototype.tryToMateWith = function(mate) {
 //	var cfg = this.type == 'bug' ? CTypes.bug() : {};
 //	for (var i = 0, l = Critter.heritable.length; i < l; i++) {
 //		var trait = Critter.heritable[i];
