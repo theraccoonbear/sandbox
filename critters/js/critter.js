@@ -226,7 +226,7 @@ var CritterClass = Class.extend({
 		
 		if (delta_x > 0) { tick_x = -tick_x; }
 		if (delta_y > 0) { tick_y = -tick_y; }
-		
+	
 		return {
 			x: tick_x,
 			y: tick_y
