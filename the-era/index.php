@@ -62,7 +62,28 @@ __HTML;
 			$this->imageResize($image_path, $this->config['thumb_height'], $thumb_path);
 		}
 		if (file_exists($thumb_path)) {
-			print "<li><a href=\"$image_path\" class=\"gallery-thumb\"><img src=\"$thumb_path\"></a></li>";
+			$exif = exif_read_data($image_path);
+			if (!is_array($exif)) {
+				$exif = array();
+			}
+			
+			$rotate = 0;
+			
+			if(!empty($exif['Orientation'])) {
+				switch($exif['Orientation']) {
+					case 8:
+						$rotate = 270;
+						break;
+					case 3:
+						$rotate = 180;
+						break;
+					case 6:
+						$rotate = 90;
+						break;
+				}
+			}
+		
+			print "<li><a href=\"$image_path\" class=\"gallery-thumb\"><img src=\"$thumb_path\" data-rotate=\"$rotate\"></a></li>";
 		}
 	}
 	
