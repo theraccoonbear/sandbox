@@ -5,9 +5,21 @@ $(function() {
 		window['$' + id] = $e;
 	});
 	
+	var resizer = function() {
+		$largeImageFrame.css({
+			bottom: $(window).height() - $('.thumb-container').position().top
+		});
+	};
+	
+	$(window).resize(resizer);
+	resizer();
+	
 	$('a.gallery-thumb').click(function(e) {
 		var $a = $(this);
-		var rot = $a.find('img').data('rotate');
+		var $img = $a.find('img');
+		var rot = $img.data('rotate');
+		var w = $img.data('width');
+		var h = $img.data('width');
 		$largeImage
 			.removeClass('rotate-0')
 			.removeClass('rotate-90')

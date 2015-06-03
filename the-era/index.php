@@ -68,7 +68,8 @@ __HTML;
 			}
 			
 			$rotate = 0;
-			
+			list($w, $h) = getimagesize($image_path);
+				
 			if(!empty($exif['Orientation'])) {
 				switch($exif['Orientation']) {
 					case 8:
@@ -83,7 +84,7 @@ __HTML;
 				}
 			}
 		
-			print "<li><a href=\"$image_path\" class=\"gallery-thumb\"><img src=\"$thumb_path\" data-rotate=\"$rotate\"></a></li>";
+			print "<li><a href=\"$image_path\" class=\"gallery-thumb\"><img src=\"$thumb_path\" data-rotate=\"$rotate\" data-width=\"$w\" data-height=\"$h\"></a></li>";
 		}
 	}
 	
@@ -123,7 +124,7 @@ __HTML;
 				$this->head('Gallery!');
 				
 				print <<<__HTML
-				<div class="large-image-frame">
+				<div id="largeImageFrame">
 					<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="largeImage">
 				</div>
 				
