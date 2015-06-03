@@ -110,7 +110,7 @@ var CritterClass = Class.extend({
 			var mate = this.asexual ? this : this.nearestMate();
 			if (mate) {
 				var dist = this.distanceTo(mate);
-				if (dist < this.speed) {
+				if (dist < this.speed * 2) {
 					this.tryToMateWith(mate);
 				} else {
 					this.waypoint = this.vectorTowards(mate);
@@ -221,7 +221,7 @@ var CritterClass = Class.extend({
 		var tick_y = Math.sin(angle) * this.speed;
 		
 		if (delta_x > 0) { tick_x = -tick_x; }
-		if (delta_y > 0) { tick_y = -tick_y; }
+		//if (delta_y > 0) { tick_y = -tick_y; }
 	
 		return {
 			x: tick_x,
