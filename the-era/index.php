@@ -83,6 +83,12 @@ __HTML;
 						break;
 				}
 			}
+			
+			//if ($rotate == 270 || $rotate == 90) {
+			//	$ow = $w;
+			//	$w = $h;
+			//	$h = $ow;
+			//}
 		
 			print "<li><a href=\"$image_path\" class=\"gallery-thumb\"><img src=\"$thumb_path\" data-rotate=\"$rotate\" data-width=\"$w\" data-height=\"$h\"></a></li>";
 		}
@@ -128,7 +134,7 @@ __HTML;
 					<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="largeImage">
 				</div>
 				
-				<div class="thumb-container">
+				<div class="thumb-container" id="thumbContainer">
 				<ul class="thumbs">
 __HTML;
 				
@@ -201,10 +207,6 @@ __HTML;
 					break;
 			}
 		}
-		
-		
-		//$height = ($width / $w) * $h;
-		//$x = 0;
 		
 		$width = ($height / $h) * $w;
 		$x = 0;
