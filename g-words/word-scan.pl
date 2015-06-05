@@ -1,60 +1,47 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use WWW::Mechanize;
-use Wiktionary::Parser;
-use Web::Scraper;
-use URI::Encode;
 use File::Slurp;
 use Data::Printer;
-use JSON::XS;
-
-#my $mech = new WWW::Mechanize(autocheck => 0);
-#my $uri = URI::Encode->new({encode_reserved => 0});
-my $parser = Wiktionary::Parser->new();
 
 sub dbg {
 	my $msg = shift;
 	print STDERR $msg . "\n";
 }
 
-my $ipa_scraper = scraper {
-	process 'span.ipa', 'ipas[]' => 'TEXT';
+my $words = [map { [split(/\s{2}/, $_)]; } grep { /^g/i } split(/\n/, read_file('cmudict-0.7b.txt'))];
+
+my $totals = {
+	j => 0,
+	g => 0,
+	o => 0,
+	all => 0
 };
 
-my $words = [grep { /^g/i } split(/\n/, read_file('american-english'))];
+my $by_sound = {
+	j => [],
+	g => [],
+	o => []
+};
 
-my $cnt = 0;
 foreach my $w (@$words) {
-	$cnt++;
-	#$w = lc($w);
-	my $word_file = 'results/' . $w . '.json';
-	if (! -f $word_file) {
-		dbg "Searching $w";
-		my $document = $parser->get_document(title => $w);
-		if ($document) {
-			my $pron = $document->get_pronunciations();
-			if ($pron->{en}) {
-				dbg $w;
-				p($pron->{en}); #{pronunciation});
-			}
-		} else {
-			dbg "No results";
-		}
-		
-		#
-		#	dbg "Scraping $w";
-		#	my $results = $ipa_scraper->scrape($mech->content);
-		#	p($results); 
-		#	if ($results->{ipas}) {
-		#		exit(0);
-		#	} else {
-		#		dbg "No results for $w"
-		#	}
-		#} else {
-		#	dbg "Couldn't search $w";
-		#}
+	if ($w->[1] =~ m/^[ZJ]H/) {
+		$totals->{j}++;
+		push @{$by_sound->{j}}, $w;
+	} elsif ($w->[1] =~ m/^G/) {
+		$totals->{g}++;
+		push @{$by_sound->{g}}, $w;
 	} else {
-		dbg "$w already processed";
+		$totals->{o}++;
+		push @{$by_sound->{o}}, $w;
 	}
+	$totals->{all}++;
 }
+
+p($by_sound->{o});
+
+print "TOTALS:\n";
+print "  J - $totals->{j} (" . ($totals->{j} / $totals->{all} * 100) . "%)\n";
+print "  G - $totals->{g} (" . ($totals->{g} / $totals->{all} * 100) . "%)\n";
+print "  O - $totals->{o} (" . ($totals->{o} / $totals->{all} * 100) . "%)\n";
+

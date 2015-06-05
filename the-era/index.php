@@ -110,7 +110,7 @@ __HTML;
 				if (!is_dir($this->config['thumb_path'])) {
 					mkdir($this->config['thumb_path']);
 					if (!is_dir($this->config['thumb_path'])) {
-						ohDear("We couldn't create the thumbnail path!");
+						$this->ohDear("We couldn't create the thumbnail path!");
 					}
 				}
 				
@@ -126,6 +126,7 @@ __HTML;
 						}
 					}
 				}
+				closedir($dfh);
 				
 				$this->head('Gallery!');
 				
@@ -142,7 +143,7 @@ __HTML;
 					$this->processImage($img);
 				}
 				print '</ul>';
-				print '</div>';
+				print '</div><!-- #thumbContainer -->';
 				$this->foot();
 			}
 		}
