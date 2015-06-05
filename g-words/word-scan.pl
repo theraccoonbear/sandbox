@@ -4,44 +4,14 @@ use warnings;
 use File::Slurp;
 use Data::Printer;
 
-sub dbg {
-	my $msg = shift;
-	print STDERR $msg . "\n";
-}
+my $s = {j => [], g => [], o => []};
+my $words = [map { my $w = [split(/\s{2}/, $_)]; my $p = 'o'; if ($w->[1] =~ m/^[ZJ]H/) { $p = 'j'; } elsif ($w->[1] =~ m/^G/) { $p = 'g' }; push @{$s->{$p}}, $w; } grep { /^g/i } split(/\n/, read_file('cmudict-0.7b.txt'))];
 
-my $words = [map { [split(/\s{2}/, $_)]; } grep { /^g/i } split(/\n/, read_file('cmudict-0.7b.txt'))];
-
-my $totals = {
-	j => 0,
-	g => 0,
-	o => 0,
-	all => 0
-};
-
-my $by_sound = {
-	j => [],
-	g => [],
-	o => []
-};
-
-foreach my $w (@$words) {
-	if ($w->[1] =~ m/^[ZJ]H/) {
-		$totals->{j}++;
-		push @{$by_sound->{j}}, $w;
-	} elsif ($w->[1] =~ m/^G/) {
-		$totals->{g}++;
-		push @{$by_sound->{g}}, $w;
-	} else {
-		$totals->{o}++;
-		push @{$by_sound->{o}}, $w;
-	}
-	$totals->{all}++;
-}
-
-p($by_sound->{o});
+print "The Odd Ones:\n";
+p($s->{o});
 
 print "TOTALS:\n";
-print "  J - $totals->{j} (" . ($totals->{j} / $totals->{all} * 100) . "%)\n";
-print "  G - $totals->{g} (" . ($totals->{g} / $totals->{all} * 100) . "%)\n";
-print "  O - $totals->{o} (" . ($totals->{o} / $totals->{all} * 100) . "%)\n";
+print "  J Sound - " . (scalar @{$s->{j}}) . " (" . ((scalar @{$s->{j}}) / (scalar @$words) * 100) . "%)\n";
+print "  G Sound - " . (scalar @{$s->{g}}) . " (" . ((scalar @{$s->{g}}) / (scalar @$words) * 100) . "%)\n";
+print "    Other - " . (scalar @{$s->{o}}) . " (" . ((scalar @{$s->{o}}) / (scalar @$words) * 100) . "%)\n";
 
