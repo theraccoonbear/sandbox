@@ -110,8 +110,8 @@ var CritterClass = Class.extend({
 			var mate = this.asexual ? this : this.nearestMate();
 			if (mate) {
 				var dist = this.distanceTo(mate);
-				if (dist < this.speed) {
-					this.mateWith(mate);
+				if (dist < this.speed * 2) {
+					this.tryToMateWith(mate);
 				} else {
 					this.waypoint = this.vectorTowards(mate);
 				}
@@ -186,14 +186,12 @@ var CritterClass = Class.extend({
 		return (this.age >= this.matures_at && this.age - this.last_spawn >= this.spawn_rate);
 	},
 	
-	mateWith: function(mate) {
-		//var cfg = this.type == 'bug' ? CTypes.bug() : {};
-		//for (var i = 0, l = Critter.heritable.length; i < l; i++) {
-		//	var trait = Critter.heritable[i];
-		//	cfg[trait] = ((mate[trait] + this[trait]) / 2) * (((Math.random() * 0.1) - 0.05) + 1); // averaged + genetic drift
-		//}
-		//cfg.x = (mate.shape.x + this.shape.x) / 2;
-		//cfg.y = (mate.shape.y + this.shape.y) / 2;
+	tryToMateWith: function(mate) {
+		if (Math.random() > 0.5) { // "try" to mate with
+			this.last_spawn = this.age;
+			return;
+		}
+		
 		opts = {
 			x: (mate.shape.x + this.shape.x) / 2,
 			y: (mate.shape.y + this.shape.y) / 2	
@@ -223,7 +221,7 @@ var CritterClass = Class.extend({
 		var tick_y = Math.sin(angle) * this.speed;
 		
 		if (delta_x > 0) { tick_x = -tick_x; }
-		if (delta_y > 0) { tick_y = -tick_y; }
+		//if (delta_y > 0) { tick_y = -tick_y; }
 	
 		return {
 			x: tick_x,
@@ -273,6 +271,7 @@ var MicrobeClass = CritterClass.extend({
 		this.figure = new createjs.Shape();
 		this.figure.graphics.beginFill(c).drawCircle(0, 0, 2);
 		this.shape.addChild(this.figure);
+		this.shape.cache(-2, -2, 4, 4);
 		this.shape.x = this.x;
 		this.shape.y = this.y;
 		return this.shape;
@@ -311,6 +310,7 @@ var BugClass = CritterClass.extend({
 		this.shape = new createjs.Shape();
 		this.shape.name = this.id;
 		this.shape.graphics.beginFill(c).drawEllipse(0, 0, 10, 5);
+		this.shape.cache(-10, -5, 20, 10);
 		this.shape.x = this.x;
 		this.shape.y = this.y;
 		this.shape.on('click', function() {
@@ -463,7 +463,7 @@ CritterFactory.register('bug', BugClass);
 //		if (mate) {
 //			var dist = this.distanceTo(mate);
 //			if (dist < this.speed) {
-//				this.mateWith(mate);
+//				this.tryToMateWith(mate);
 //			} else {
 //				this.waypoint = this.vectorTowards(mate);
 //			}
@@ -538,7 +538,7 @@ CritterFactory.register('bug', BugClass);
 //	return (this.age >= this.matures_at && this.age - this.last_spawn >= this.spawn_rate);
 //};
 //
-//Critter.prototype.mateWith = function(mate) {
+//Critter.prototype.tryToMateWith = function(mate) {
 //	var cfg = this.type == 'bug' ? CTypes.bug() : {};
 //	for (var i = 0, l = Critter.heritable.length; i < l; i++) {
 //		var trait = Critter.heritable[i];
