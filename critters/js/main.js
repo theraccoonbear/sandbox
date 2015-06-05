@@ -7,28 +7,29 @@
 //});
 
 
-var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-var stage = document.getElementById('stage');
-stage.width = w;
-stage.height = h;
+//var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+//var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+//var stage = document.getElementById('stage');
+//stage.width = w;
+//stage.height = h;
 
-var env = new Environment({
+CritterFactory.environment = new EnvironmentClass({
 	stage_id: 'stage',
 	capacity: 300,
 	initial_population: {
-		20: ''
+		20: 'bug'
 	}
 });
 
-env.init();
+CritterFactory.environment.init();
+CritterFactory.environment.start();
 
-for (var i = 0; i < env.capacity; i++) {
-	var cfg = {};
-	if (Math.random() > 0.90) { cfg = CTypes.bug(); }
-	env.addCrit(cfg);
-}
+//for (var i = 0; i < env.capacity; i++) {
+//	var cfg = {};
+//	if (Math.random() > 0.90) { cfg = CTypes.bug(); }
+//	env.addCrit(cfg);
+//}
 
 
-env.start();
+
 
