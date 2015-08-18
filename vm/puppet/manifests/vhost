@@ -1,0 +1,44 @@
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    ServerName wallpepper.dev
+	
+	php_value upload_max_filesize 10M
+    
+	Alias /js /vagrant/publish/dev/js
+    <Directory /vagrant/publish/dev/js>
+        Options Indexes FollowSymLinks Includes
+        AllowOverride All
+        Require all granted
+    </Directory>
+	
+	Alias /css /vagrant/publish/dev/css
+    <Directory /vagrant/publish/dev/css>
+        Options Indexes FollowSymLinks Includes
+        AllowOverride All
+        Require all granted
+    </Directory>
+	
+	Alias /images /vagrant/publish/dev/images
+    <Directory /vagrant/publish/dev/images>
+        Options Indexes FollowSymLinks Includes
+        AllowOverride All
+        Require all granted
+    </Directory>
+	
+	Alias /fonts /vagrant/publish/dev/fonts 
+    <Directory /vagrant/publish/dev/fonts >
+        Options Indexes FollowSymLinks Includes
+        AllowOverride All
+        Require all granted
+    </Directory>
+	
+    DocumentRoot /vagrant/wallpepper/public
+    <Directory /vagrant/wallpepper/public>
+        Options Indexes FollowSymLinks Includes
+        AllowOverride All
+        Require all granted
+    </Directory>
+    <Directory /vagrant/wallpepper/public/css/fonts>
+        Header set Access-Control-Allow-Origin "*"
+    </Directory>
+</VirtualHost>

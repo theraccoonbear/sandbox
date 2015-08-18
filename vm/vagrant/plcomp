@@ -6,8 +6,12 @@ my $cpanm = `which cpanm`;
 chomp($cpanm);
 
 if (! -f $cpanm) {
-    `mkdir -p ~/bin && cd ~/bin && curl -L https://cpanmin.us/ -o cpanm && chmod +x cpanm`;
-    $cpanm = `which cpanm`;
+    `curl -L https://cpanmin.us | perl - --sudo App::cpanminus`;
+    my $cpanm = `which cpanm`;
+    chomp($cpanm);
+    if (! -f $cpanm) {
+        die "Couldn't install cpanm";
+    }
 }
 
 sub modPath {
@@ -20,10 +24,11 @@ sub modPath {
 sub installIfAbsent {
     my $module = shift @_;
     my $mod_path = modPath($module);
-    print "$module : $mod_path\n";
     if (! -f $mod_path) {
         print "Couldn't find $module.  Tring to install...\n";
-        `sudo cpanm -v $module`;
+        my $cmd = "sudo $cpanm -v $module";
+        print "\$ $cmd\n";
+        `$cmd`;
         $mod_path = modPath($module);
         if (-f $mod_path) {
             print "...SUCCESS!\n";
@@ -31,6 +36,8 @@ sub installIfAbsent {
             print "...FAILURE!\n";
         }
         
+    } else {
+        print "$module is installed!\n";
     }
     return $mod_path;
 }
@@ -39,20 +46,21 @@ installIfAbsent('JSON::XS');
 installIfAbsent('File::Slurp');
 #installIfAbsent('Data::Printer');
 
-eval {
-    use JSON::XS;
-    use File::Slurp;
-    #use Data::Printer;
-};
+eval "use JSON::XS;";
+die $@ if $@;
+eval "use File::Slurp;";
 die $@ if $@;
 
-if (!$ARGV[0] || ! -f $ARGV[0]) {
+my $file = $ARGV[0] || 'plcomp.json';
+
+if (! -f $file) {
     print "Usage:\n";
     print "  plcomp <your-file>.json\n\n";
     exit(0);
 }
 
-my $data = decode_json(read_file($ARGV[0]));
+my $raw = read_file($file);
+my $data = decode_json($raw);
 if (! $data->{require}) {
     print "Uh oh, no requires!";
     exit(0);

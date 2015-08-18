@@ -1,0 +1,9 @@
+{
+    "require": [
+        { "name": "Dancer2" },
+        { "name": "URL::Encode::XS" },
+        { "name": "CGI::Deurl::XS" },
+        { "name": "URL::Encode::XS" },
+        { "name": "CGI::Deurl::XS" }
+    ]
+}
