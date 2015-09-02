@@ -1,0 +1,4 @@
+var Character = Class.extend({
+	
+});
+
