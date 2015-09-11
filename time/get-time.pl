@@ -49,12 +49,16 @@ do {
     $dt = $dt->add(days => 1);
     $dt_str = $dt->strftime("%Y%m%d");
     my $dow = DayOfWeek($dt->year, $dt->month, $dt->day);
-    $hours_needed += ($dow =~ m/^(Sat|Sun)/) ? 0 : 8;
+    $hours_needed += ($dow =~ m/^(Sat|Sun)/) ? 0 : 7.84615384615;
 } while ($dt_str ne $e_date);
 
-my $delta = $hours_needed - $hours_worked;
+my $delta = sprintf('%0.2f', $hours_worked - $hours_needed);
+$hours_needed = sprintf('%0.2f', $hours_needed);
+$hours_worked = sprintf('%0.2f', $hours_worked);
 print <<__TIME;
-  Worked: $hours_worked
-  Needed: $hours_needed
-  Short: $delta
+TIME REPORT:
+    Needed: $hours_needed hours
+    Worked: $hours_worked hours
+    Accrued: $delta hours
+
 __TIME
