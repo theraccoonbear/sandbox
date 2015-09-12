@@ -1,0 +1,71 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+my $cpanm = `which cpanm`;
+chomp($cpanm);
+
+if (! -f $cpanm) {
+    `curl -L https://cpanmin.us | perl - --sudo App::cpanminus`;
+    my $cpanm = `which cpanm`;
+    chomp($cpanm);
+    if (! -f $cpanm) {
+        die "Couldn't install cpanm";
+    }
+}
+
+sub modPath {
+    my $module = shift @_;
+    my $mod_path = `perldoc -l $module 2> /dev/null`;
+    chomp($mod_path);
+    return $mod_path;
+}
+
+sub installIfAbsent {
+    my $module = shift @_;
+    my $mod_path = modPath($module);
+    if (! -f $mod_path) {
+        print "Couldn't find $module.  Tring to install...\n";
+        my $cmd = "sudo $cpanm -v $module";
+        print "\$ $cmd\n";
+        `$cmd`;
+        $mod_path = modPath($module);
+        if (-f $mod_path) {
+            print "...SUCCESS!\n";
+        } else {
+            print "...FAILURE!\n";
+        }
+        
+    } else {
+        print "$module is installed!\n";
+    }
+    return $mod_path;
+}
+
+installIfAbsent('JSON::XS');
+installIfAbsent('File::Slurp');
+#installIfAbsent('Data::Printer');
+
+eval "use JSON::XS;";
+die $@ if $@;
+eval "use File::Slurp;";
+die $@ if $@;
+
+my $file = $ARGV[0] || 'plcomp.json';
+
+if (! -f $file) {
+    print "Usage:\n";
+    print "  plcomp <your-file>.json\n\n";
+    exit(0);
+}
+
+my $raw = read_file($file);
+my $data = decode_json($raw);
+if (! $data->{require}) {
+    print "Uh oh, no requires!";
+    exit(0);
+}
+
+foreach my $req (@{ $data->{require} }) {
+    installIfAbsent($req->{name});
+}

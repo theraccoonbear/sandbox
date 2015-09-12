@@ -1,0 +1,31 @@
+html { height: 100% }
+body { height: 100%; margin: 0; padding: 0 }
+
+#mapCanvas {
+	position: fixed !important;
+	height: 100%;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: 0;
+}
+
+.overlays {
+	z-index: 1000;
+}
+
+.FOW {
+	position: fixed;
+	background: #fff;
+	opacity: 0.9;
+}
+
+#debug {
+	position: fixed;
+	top: 10;
+	left: 10;
+	background: #fff;
+	color: #000;
+	padding: 10px;
+	font-family: Consolas, Courier New, Courier, monospace;
+}
