@@ -5,13 +5,6 @@ use File::Slurp;
 use JSON::XS;
 use Data::Printer;
 use Cwd qw(abs_path realpath);
-
-#eval {
-#    my $script_path = realpath($0);
-#    $script_path =~ s/\/[^\/]+$//;
-#    use lib $script_path;
-#}
-
 use FindBin;
 use File::Basename;
 use lib dirname(abs_path($0));

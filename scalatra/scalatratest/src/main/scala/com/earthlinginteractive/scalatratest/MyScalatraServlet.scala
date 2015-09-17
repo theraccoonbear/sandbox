@@ -16,8 +16,14 @@ class MyScalatraServlet extends ScalatratestStack {
     </html>
   }
   
+  get("/login") {
+    contentType = "text/html"
+    jade("/login", "username" -> "[empty]")
+  }
+  
   post("/login") {
-       
+    contentType = "text/html"
+    jade("/login", "username" -> params.get("username"), "password" -> params.get("password"))
   }
 
 
