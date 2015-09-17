@@ -13,5 +13,5 @@
     "org.scalaquery" % "scalaquery_2.9.0-1" % "0.9.5",
     "postgresql" % "postgresql" % "9.1-901.jdbc4"
   to ./project/build.scala's libraryDependencies    
-
+* Getting up and running on Ubuntu was much more straightforward.  Need to setup a Vagrant box.
         
