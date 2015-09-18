@@ -2,11 +2,17 @@ package com.earthlinginteractive.scalatratest
 
 import org.scalatra._
 import scalate.ScalateSupport
+import java.sql.{Connection, DriverManager, ResultSet};
+
 
 class MyScalatraServlet extends ScalatratestStack {
   before() {
-    /** MyDb.connect */
+    val dbc = "jdbc:postgresql://localhost:5432/scalatra_app?user=scalatrauser&password=password"
+    classOf[com.postgresql.jdbc.Driver]
+    val conn = DriverManager.getConnection(dbc)
+    val statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE)
   }
+  
   get("/") {
     <html>
       <body>
@@ -18,16 +24,16 @@ class MyScalatraServlet extends ScalatratestStack {
   
   get("/login") {
     contentType = "text/html"
-    jade("/login", "username" -> "[empty]")
+    mustache("/login")
   }
   
   post("/login") {
     contentType = "text/html"
-    jade("/login", "username" -> params.get("username"), "password" -> params.get("password"))
+    mustache("/login", "username" -> params.get("username"), "password" -> params.get("password"))
   }
 
 
   after() {
-    /** MyDb.disconnect */
+    
   }
 }

@@ -29,8 +29,8 @@ object ScalatratestBuild extends Build {
         "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime",
         "org.eclipse.jetty" % "jetty-webapp" % "9.2.10.v20150310" % "container",
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided",
-        "org.scalaquery" % "scalaquery_2.9.0-1" % "0.9.5",
-        "postgresql" % "postgresql" % "9.1-901.jdbc4"
+        "postgresql" % "postgresql" % "9.1-901.jdbc4",
+        "org.squeryl" % "squeryl_2.10" % "0.9.5-6"
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
         Seq(

@@ -14,4 +14,5 @@
     "postgresql" % "postgresql" % "9.1-901.jdbc4"
   to ./project/build.scala's libraryDependencies    
 * Getting up and running on Ubuntu was much more straightforward.  Need to setup a Vagrant box.
-        
+* Scalate does not explicitly state it (that I could find), but Mustache templates require the .mustache extension: https://scalate.github.io/scalate/documentation/mustache.html#Layouts
+* Currently recompilation and server restart (when code changes) takes 3-6 seconds on my MacBook.  As the app grows, this could become a pain, and we may want to look into jRebel: http://www.scalatra.org/getting-started/jrebel.html

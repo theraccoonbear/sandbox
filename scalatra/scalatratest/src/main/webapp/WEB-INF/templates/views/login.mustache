@@ -1,0 +1,9 @@
+<h1>Login Form</h1>
+{{#username}}
+<h4>Hey "{{ username }}" either we couldn't find your account or that's not the right password!</h4>
+{{/username}}
+<form method="post">
+    <label for="username">Username: <input id="username" name="username"{{#username}} value="{{username}}"{{/username}}></label><br>
+    <label for="password">Password: <input id="password" name="password" type="password"></label><br>
+    <input type="submit" value="Log In">
+</form>

@@ -1,0 +1,22 @@
+#!/usr/bin/perl ../scripts/generate-schema.pl
+---
+Settings:
+  db_type: pg
+  Schema: Scalatra
+
+Fields All:     # every table gets these
+  - name: id
+  - name: created
+  - name: modified
+  - name: archived
+    
+Tables:         # table specific columns
+  - Name: users
+    Fields:
+      - name: username
+      - name: password
+  
+  - Name: log
+    Fields:
+      - name: message
+      - name: status
