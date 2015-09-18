@@ -32,8 +32,9 @@ class MyScalatraServlet extends ScalatratestStack {
     connection = DriverManager.getConnection(db_url, db_username, db_password)
   }
   
-  before("/secure/*") {
-    
+  before("/secure") {
+    basicAuth
+    mustache("secure")
   }
   
   get("/") {
@@ -59,24 +60,22 @@ class MyScalatraServlet extends ScalatratestStack {
     println("  user: " + user)
     println("  hashed: " + hashed)
   
-    try {
-      val statement = connection.createStatement()
-      val findUserQuery = connection.prepareStatement("SELECT * FROM users WHERE username = ?");
-      findUserQuery.setString(1, user);
-      val resultSet = findUserQuery.executeQuery()
-      
-      if (resultSet.next()) {
-        println("From DB:")
-        println("  user: " + resultSet.getString("username"))
-        println("  hashed: " + resultSet.getString("password"))
-        if (hashed == resultSet.getString("password")) {
-          println("Success!");
-        } else {
-          println("Login Fail!")
-        }
+    
+    val statement = connection.createStatement()
+    val findUserQuery = connection.prepareStatement("SELECT * FROM users WHERE username = ?");
+    findUserQuery.setString(1, user);
+    val resultSet = findUserQuery.executeQuery()
+    
+    if (resultSet.next()) {
+      println("From DB:")
+      println("  user: " + resultSet.getString("username"))
+      println("  hashed: " + resultSet.getString("password"))
+      if (hashed == resultSet.getString("password")) {
+        println("Success!");
+        redirect("/secure")
+      } else {
+        println("Login Fail!")
       }
-    } catch {
-      case e : Throwable => e.printStackTrace
     }
   
     contentType = "text/html"
