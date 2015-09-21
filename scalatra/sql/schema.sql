@@ -1,7 +1,9 @@
 DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
+  access VARCHAR(255)  DEFAULT 'user',
   password VARCHAR(255)  DEFAULT '',
+  salt VARCHAR(255)  DEFAULT '',
   username VARCHAR(255)  DEFAULT '',
   created TIMESTAMP WITH TIME ZONE ,
   archived VARCHAR(255)  DEFAULT '0',

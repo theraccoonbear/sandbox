@@ -17,3 +17,4 @@
 * Currently recompilation and server restart (when code changes) takes 3-6 seconds on my MacBook (closer to 10 seconds on my home computer).  As the app grows, this could become a pain, and we may want to look into jRebel: http://www.scalatra.org/getting-started/jrebel.html
 * Changes to ./project/build.scala (such as adding to libraryDependencies) are not detected automatically and, as far as I can tell, actually require exiting sbt and rerunning to pickup the changes and install dependencies.
 * From the docs: Remember, unlike Sinatra, routes are matched from the bottom up. (this is backward from other routing engines I've used as well): http://scalatra.org/guides/http/routes.html#toc_271
+* Have been modeling auth on: https://github.com/scalatra/scalatra-website-examples/tree/master/2.4/http/scentry-auth-demo

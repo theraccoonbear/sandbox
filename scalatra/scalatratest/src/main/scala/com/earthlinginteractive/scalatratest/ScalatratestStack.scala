@@ -6,6 +6,7 @@ import org.fusesource.scalate.{ TemplateEngine, Binding }
 import org.fusesource.scalate.layout.DefaultLayoutStrategy
 import javax.servlet.http.HttpServletRequest
 import collection.mutable
+import com.earthlinginteractive.scalatratest.auth.AuthenticationSupport
 
 trait ScalatratestStack extends ScalatraServlet with ScalateSupport with AuthenticationSupport {
 
