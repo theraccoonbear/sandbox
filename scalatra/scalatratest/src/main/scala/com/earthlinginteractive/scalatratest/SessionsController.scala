@@ -25,7 +25,7 @@ class SessionsController extends MyScalatraServlet with AuthenticationSupport {
     scentry.authenticate()
 
     if (isAuthenticated) {
-      redirect("/")
+      redirect("/secure")
     }else{
       redirect("/sessions/new")
     }

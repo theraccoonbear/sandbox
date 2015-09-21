@@ -63,11 +63,6 @@ class UserPasswordStrategy(protected val app: ScalatraBase)(implicit request: Ht
     Class.forName(db_driver)
     connection = DriverManager.getConnection(db_url, db_username, db_password)
   
-    val hashed = hashPass(pass + ":" + user)
-    println("From User:")
-    println("  user: " + user)
-    println("  hashed: " + hashed)
-  
     val statement = connection.createStatement()
     val findUserQuery = connection.prepareStatement("SELECT * FROM users WHERE username = ?");
     findUserQuery.setString(1, user);
@@ -76,8 +71,16 @@ class UserPasswordStrategy(protected val app: ScalatraBase)(implicit request: Ht
     logger.info("UserPasswordStrategy: attempting authentication")
     
     if (resultSet.next()) {
+      val hashed = hashPass(pass + ":" + resultSet.getString("salt"))
+      println("From User:")
+      println("  user: " + user)
+      println("  hashed: " + hashed)
+  
+    
+    
       println("From DB:")
       println("  user: " + resultSet.getString("username"))
+      println("  salt: " + resultSet.getString("salt"))
       println("  hashed: " + resultSet.getString("password"))
       if (hashed == resultSet.getString("password")) {
         println("Success!");
@@ -87,6 +90,7 @@ class UserPasswordStrategy(protected val app: ScalatraBase)(implicit request: Ht
         None
       }
     } else {
+      println("Could not find user!")
       None
     }
   

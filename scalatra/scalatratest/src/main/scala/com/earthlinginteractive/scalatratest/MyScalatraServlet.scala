@@ -6,30 +6,14 @@ import scalate.ScalateSupport
 
 class MyScalatraServlet extends ScalatratestStack {
   before() {
-    
+    contentType="text/html"  
   }
   
   get("/") {
-    <html>
-      <body>
-        <h1>Welcome to the Test App!</h1>
-        Would you like to <a href="/login">login</a>?
-      </body>
-    </html>
+    mustache("index")
   }
   
-  //get("/login") {
-  //  contentType = "text/html"
-  //  mustache("/login")
-  //}
-  
-  //post("/login") {
-  //  contentType = "text/html"
-  //  mustache("/login", "username" -> params.get("username"), "password" -> params.get("password"))
-  //}
-
-
-  after() {
-    //connection.close()    
+  get("/register") {
+    mustache("register")
   }
 }

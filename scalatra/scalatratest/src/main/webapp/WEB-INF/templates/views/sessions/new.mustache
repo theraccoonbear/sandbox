@@ -1,7 +1,9 @@
-<h1>Login Form</h1>
-{{#username}}
-<h4>Hey "{{ username }}" either we couldn't find your account or that's not the right password!</h4>
-{{/username}}
+<h2>Login Form</h2>
+
+<p>
+    Would you like to go <a href="/">home</a>?
+</p>
+
 <form method="post" action="/sessions">
     <label for="username">Username: <input id="username" name="username"{{#username}} value="{{username}}"{{/username}}></label><br>
     <label for="password">Password: <input id="password" name="password" type="password"></label><br>
