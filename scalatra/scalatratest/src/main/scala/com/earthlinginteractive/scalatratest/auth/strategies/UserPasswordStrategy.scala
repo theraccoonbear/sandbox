@@ -5,6 +5,13 @@ import java.sql.Connection
 import java.security.MessageDigest
 import java.security.SecureRandom
 
+import java.security.SecureRandom
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.SecretKeyFactory
+import java.math.BigInteger
+import java.security.NoSuchAlgorithmException
+import java.security.spec.InvalidKeySpecException
+
 import org.scalatra.ScalatraBase
 import org.scalatra.auth.ScentryStrategy
 import com.earthlinginteractive.scalatratest.models.UserX
@@ -18,13 +25,16 @@ class UserPasswordStrategy(protected val app: ScalatraBase)(implicit request: Ht
   var connection:Connection = null
   val logger = LoggerFactory.getLogger(getClass)
 
+  val iterations:Integer = 1000
+  val algorithm:String = "PBKDF2WithHmacSHA1"
+  val hash_byte_size:Integer = 24
+  val salt_byte_size:Integer = 24
   override def name: String = "UserPassword"
 
   private def user = app.params.getOrElse("username", "")
   private def pass = app.params.getOrElse("password", "")
 
-
-
+  
   def bytes2hex(bytes: Array[Byte], sep: Option[String] = None): String = {
     sep match {
       case None => bytes.map("%02x".format(_)).mkString
@@ -38,6 +48,34 @@ class UserPasswordStrategy(protected val app: ScalatraBase)(implicit request: Ht
     bytes2hex(MessageDigest.getInstance("MD5").digest(s.getBytes))
   }
 
+  def genSalt(size: Integer = 64): String = {
+    var random:SecureRandom = new SecureRandom();
+    var salt: Array[Byte] = new Array[Byte](size);
+    random.nextBytes(salt)
+    bytes2hex(salt);
+  }
+
+  def createHash(password: String): String = {
+    return createHash(password.toCharArray());
+  }
+
+  def createHash(password: Array[Char]):String = {
+    var random:SecureRandom = new SecureRandom();
+    var salt: Array[Byte] = new Array[Byte](salt_byte_size);
+    random.nextBytes(salt);
+
+    // Hash the password
+    var hash: Array[Byte] = pbkdf2(password, salt, iterations, hash_byte_size);
+    // format iterations:salt:hash
+    return iterations + ":" + bytes2hex(salt) + ":" +  bytes2hex(hash)
+  }
+
+  def pbkdf2(password: Array[Char], salt: Array[Byte], iterations: Integer, bytes: Integer): Array[Byte] = {
+    //throws NoSuchAlgorithmException, InvalidKeySpecException
+      var spec:PBEKeySpec = new PBEKeySpec(password, salt, iterations, bytes * 8);
+      var skf: SecretKeyFactory = SecretKeyFactory.getInstance(algorithm);
+      return skf.generateSecret(spec).getEncoded();
+  }
 
   /***
     * Determine whether the strategy should be run for the current request.
