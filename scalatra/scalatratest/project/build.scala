@@ -31,7 +31,8 @@ object ScalatratestBuild extends Build {
         "org.eclipse.jetty" % "jetty-webapp" % "9.2.10.v20150310" % "container",
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided",
         "org.postgresql" % "postgresql" % "9.3-1100-jdbc41",
-        "org.scalatra" %% "scalatra-auth" % "2.4.0.RC1"
+        "org.scalatra" %% "scalatra-auth" % "2.4.0.RC1",
+        "com.lambdaworks" % "scrypt" % "1.4.0"
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
         Seq(

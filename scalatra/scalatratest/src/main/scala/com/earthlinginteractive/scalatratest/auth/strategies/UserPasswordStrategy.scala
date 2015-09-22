@@ -17,7 +17,7 @@ import org.scalatra.auth.ScentryStrategy
 import com.earthlinginteractive.scalatratest.models.UserX
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.slf4j.LoggerFactory
-
+import com.earthlinginteractive.scalatratest.auth.PasswordHandler
 
 class UserPasswordStrategy(protected val app: ScalatraBase)(implicit request: HttpServletRequest, response: HttpServletResponse)
   extends ScentryStrategy[UserX] {
@@ -29,6 +29,8 @@ class UserPasswordStrategy(protected val app: ScalatraBase)(implicit request: Ht
   val algorithm:String = "PBKDF2WithHmacSHA1"
   val hash_byte_size:Integer = 24
   val salt_byte_size:Integer = 24
+  val passTool = new PasswordHandler()
+  
   override def name: String = "UserPassword"
 
   private def user = app.params.getOrElse("username", "")

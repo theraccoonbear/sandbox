@@ -27,9 +27,9 @@ class MyScalatraServlet extends ScalatratestStack {
     if (pass != pass_again) {
       regError("Mismatched passwords!")
     }
-    var ups = new UserPasswordStrategy(self)
+    //var ups = new UserPasswordStrategy(app)
     
-    println(ups.hashPass(pass))
+    //println(ups.hashPass(pass))
     println(user + " - " + pass + " - " + pass_again)
     mustache("register")
   }
