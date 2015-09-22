@@ -13,7 +13,18 @@ use WebService::Harvest;
 use Time::DayOfWeek qw(:dow);
 use DateTime::Format::Strptime;
 
-my $cfg = decode_json(read_file(dirname(abs_path($0)) . '/config.json'));
+
+my $cfg_file = dirname(abs_path($0)) . '/config.json';
+
+if (! -f $cfg_file) {
+    (my $cfg_tmpl = $cfg_file) =~ s/\.json/\.example.json/;
+    print "You don't have a config.json file!  I've copied config.sample.json as a starting template.\n\n";
+    `cp '$cfg_tmpl' '$cfg_file'`;
+    exit(0);
+}
+
+
+my $cfg = decode_json(read_file($cfg_file));
 
 my $harvest = new WebService::Harvest(config => $cfg);
 
@@ -50,18 +61,24 @@ my $strp = DateTime::Format::Strptime->new(
 my $dt = $strp->parse_datetime($s_date);
 my $dt_str;
 my $hours_needed = 0;
+my $work_days = 0;
 do {
     $dt = $dt->add(days => 1);
     $dt_str = $dt->strftime("%Y%m%d");
     my $dow = DayOfWeek($dt->year, $dt->month, $dt->day);
     $hours_needed += ($dow =~ m/^(Sat|Sun)/) ? 0 : 7.84615384615;
+    $work_days += ($dow =~ m/^(Sat|Sun)/) ? 0 : 1;
 } while ($dt_str ne $e_date);
 
 my $delta = sprintf('%0.2f', $hours_worked - $hours_needed);
 $hours_needed = sprintf('%0.2f', $hours_needed);
 $hours_worked = sprintf('%0.2f', $hours_worked);
+my $avg_hours_per_work_day = sprintf('%0.2f', $hours_worked / $work_days);
+
 print <<__TIME;
-TIME REPORT:
+HARVEST TIME REPORT:
+    Work Days: $work_days
+    Avg Hours/Day: $avg_hours_per_work_day
     Needed: $hours_needed hours
     Worked: $hours_worked hours
     Accrued: $delta hours
