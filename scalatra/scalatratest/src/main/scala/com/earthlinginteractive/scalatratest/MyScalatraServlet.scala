@@ -3,9 +3,11 @@ package com.earthlinginteractive.scalatratest
 import org.scalatra._
 import scalate.ScalateSupport
 import com.earthlinginteractive.scalatratest.auth.strategies.UserPasswordStrategy
-
+import com.earthlinginteractive.scalatratest.auth.PasswordHandler
 
 class MyScalatraServlet extends ScalatratestStack {
+  var passHdlr = new PasswordHandler()
+
   before() {
     contentType="text/html"  
   }
@@ -19,6 +21,7 @@ class MyScalatraServlet extends ScalatratestStack {
   }
   
   post("/register") {
+  
     var message = ""
     var user = params.getOrElse("username", "")
     var pass = params.getOrElse("password", "")
@@ -26,10 +29,10 @@ class MyScalatraServlet extends ScalatratestStack {
   
     if (pass != pass_again) {
       regError("Mismatched passwords!")
+    } else {
+      val hashed = passHdlr.hashPass(pass)
     }
-    //var ups = new UserPasswordStrategy(app)
     
-    //println(ups.hashPass(pass))
     println(user + " - " + pass + " - " + pass_again)
     mustache("register")
   }

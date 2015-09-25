@@ -15,7 +15,6 @@ Tables:         # table specific columns
     Fields:
       - name: username
       - name: password
-      - name: salt
       - name: access
         def: user
   

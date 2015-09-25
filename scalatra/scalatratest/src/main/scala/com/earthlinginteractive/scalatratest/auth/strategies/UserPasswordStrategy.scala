@@ -29,7 +29,7 @@ class UserPasswordStrategy(protected val app: ScalatraBase)(implicit request: Ht
   val algorithm:String = "PBKDF2WithHmacSHA1"
   val hash_byte_size:Integer = 24
   val salt_byte_size:Integer = 24
-  val passTool = new PasswordHandler()
+  val passHdlr = new PasswordHandler()
   
   override def name: String = "UserPassword"
 
@@ -109,20 +109,13 @@ class UserPasswordStrategy(protected val app: ScalatraBase)(implicit request: Ht
     val resultSet = findUserQuery.executeQuery()
     
     logger.info("UserPasswordStrategy: attempting authentication")
-    
-    if (resultSet.next()) {
-      val hashed = hashPass(pass + ":" + resultSet.getString("salt"))
-      println("From User:")
-      println("  user: " + user)
-      println("  hashed: " + hashed)
   
-    
-    
+    if (resultSet.next()) {
+      
       println("From DB:")
       println("  user: " + resultSet.getString("username"))
-      println("  salt: " + resultSet.getString("salt"))
       println("  hashed: " + resultSet.getString("password"))
-      if (hashed == resultSet.getString("password")) {
+      if (passHdlr.checkPass(pass, resultSet.getString("password"))) {
         println("Success!");
         Some(UserX(user))
       } else {
