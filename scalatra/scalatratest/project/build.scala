@@ -30,6 +30,7 @@ object ScalatratestBuild extends Build {
         "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime",
         "org.eclipse.jetty" % "jetty-webapp" % "9.2.10.v20150310" % "container",
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided",
+        "org.squeryl" %% "squeryl" % "0.9.5-7",
         "org.postgresql" % "postgresql" % "9.3-1100-jdbc41",
         "org.scalatra" %% "scalatra-auth" % "2.4.0.RC1",
         "com.lambdaworks" % "scrypt" % "1.4.0"
