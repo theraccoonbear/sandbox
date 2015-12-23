@@ -1,0 +1,31 @@
+#!./test.pl
+---
+Name: race-series
+People:
+  - &personBoardPresident
+    Name: Board President
+    Email: prez@board.ru
+  
+Dependencies:
+  - Name: racer-premiums
+    Due: 11/9/2015
+    Dependencies:
+      - Name: produced
+        Duration: 4 weeks
+        Dependencies: 
+          - Name: designed
+            Duration: 1 week
+            
+  - Name: venue-reserved
+    Due: 1/6/2016
+    Dependencies:
+      - Name: application-processed
+        Duration: 3 weeks
+        Dependencies:
+          - Name: application-submitted
+            Dependencies:
+              - Name: tax-id-number
+                Dependencies:
+                  - *personBoardPresident
+                
+
