@@ -1,0 +1,45 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use utf8;
+use File::Slurp;
+use Data::Printer;
+use Getopt::Long;
+
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+                                                localtime(time);
+
+my $file;
+my $album_year = $year + 1900;
+
+GetOptions (
+    "year=i" => \$album_year,
+    "file=s"   => \$file
+);
+
+if (! $file || ! -f $file) {
+    die "Can't read file\n";
+}
+
+my ($artist, $album) = split(/\s*-\s*/, $file);
+$album =~ s/\.zip//;
+my $new_dir = "$artist-$album";
+mkdir $new_dir;
+system('unzip', $file, '-d', $new_dir);
+
+opendir DFH, $new_dir;
+my $files = [grep { /\.mp3$/ } readdir DFH];
+foreach my $f( @$files) {
+    my $new_f = $f;
+    if ($new_f =~ m/^.+(?<number>\d{2})\s+(?<name>.+?)\.mp3$/) {
+        my $track_num = 1 * $+{number};
+        my $track_name = $+{name};
+        $new_f = $new_dir . '/' . $+{number} . ' - ' . $+{name} . ".mp3";
+        
+        $f = $new_dir . '/' . $f;
+        rename $f, $new_f;
+        system('id3tool', '-y', $album_year, '-r', $artist, '-a', $album, '-t', $track_name, '-c', $track_num, $new_f);
+    }
+}
+
+system('id3tool', $new_dir . '/*.mp3');

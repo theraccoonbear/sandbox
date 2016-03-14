@@ -7,5 +7,6 @@ class ScalatraBootstrap extends LifeCycle {
     context.mount(new MyScalatraServlet, "/*")
     context.mount(new ProtectedController, "/secure/*")
     context.mount(new SessionsController, "/sessions/*")
+    context.mount(new BoardsController, "/boards/*")
   }
 }
