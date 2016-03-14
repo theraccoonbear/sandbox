@@ -34,7 +34,7 @@ class WRS {
 		# http://www.pbs.org/woodwrightsshop/watch-on-line/watch-season-episodes/2015-2016-episodes/
 		my $eps = [];
 		my $url = 'http://www.pbs.org/woodwrightsshop/watch-on-line/watch-season-episodes/' . uri_escape($start) . '-' . uri_escape($end) . '-episodes/';
-		$self->mech->get($url);
+		$self->doGet($url);
 		if ($self->mech->success) {
 			my $cont = $self->mech->content;
 			my $res = $season_episode_scraper->scrape($cont);
@@ -48,16 +48,23 @@ class WRS {
 		return $eps;
 	}
 	
+	method doGet(Str $url) {
+		print STDERR "FETCHING: $url\n";
+		$self->mech->get($url);
+		print STDERR $self->mech->success ? "SUCCESS" : "FAIL";
+		print STDERR "\n";
+	}
+	
 	method getEpisodeChunkList(Int $episode_id) {
 		my $chunks = [];
 		my $url = 'http://www.pbs.org/woodwrightsshop/lunchbox_plugins/merlin_plugin/video_frame/' . uri_escape($episode_id) . '/';
-		$self->mech->get($url);
+		$self->doGet($url);
 		if ($self->mech->success) {
 			my $cont = $self->mech->content;
 			my $data = decode_json($cont);
 			if ($data->{player_code} && $data->{player_code}->{template}) {
 				if ($data->{player_code}->{template} =~ m/src=['"](?<url>[^"']+)["']/i) {
-					$self->mech->get($+{url});
+					$self->doGet($+{url});
 					if ($self->mech->success) {
 						if ($self->mech->content =~ m/['"]recommended_encoding['"]\s*:\s*(?<json>\{.+?\})/gism) {
 							my $json = $+{json};
@@ -67,31 +74,36 @@ class WRS {
 								# http://urs.pbs.org/redirect/17724af1ba45488d9abec7937539ea28/?format=jsonp&callback=jQuery18308222382439998503_1457911578478&_=1457911578640
 								$enc->{url} .= '?format=jsonp&callback=jQuery123456789_987654321&_=987654321';
 								
-								$self->mech->get($enc->{url});
-								
-								my $status = $self->mech->status();
-								if (($status >= 300) && ($status < 400)) {
-									my $location = $self->mech->response()->header('Location');
-									if (defined $location) {
-										print "Redirected to $location\n";
-										#$mech->get(URI->new_abs($location, $mech->base()));
-									}
-								}
-								p($enc->{url});
-								p($self->mech->content);
-								exit(0);
+								$self->doGet($enc->{url});
 								
 								if ($self->mech->success) {
-									if ($self->mech->content =~ m/URI="(?<uri>[^"]+?2500K[^"]+?)"/gism) {
-										my $uri = $+{uri};
-										p($enc->{url});
-										p($uri);
-										#http://ga.video.cdn.pbs.org/videos/woodwrights-shop/f6e1936b-b046-41e0-85b0-9c44d9fde051/199370/hd-mezzanine-16x9/ea6b066f_wows350143-16x9-hls-400-2500k_177.m3u8
-										#http://ga.video.cdn.pbs.org/ea6b066f_wows350143-16x9-hls-2500k-iframe-index.m3u8
-										$self->mech->get($uri);
+									$cont = $self->mech->content;
+									$cont =~ s/^jQuery\d+_\d+\(//gi;
+									$cont =~ s/\)$//g;
+									$data = decode_json($cont);
+									if ($data->{url}) {
+										my $uri = $data->{url};
+										$self->doGet($uri);
 										if ($self->mech->success) {
-											while ($self->mech->content =~ m/^(?<chunk>.+\.ts)$/gim) {
-												push @$chunks, $+{chunk};
+											if ($self->mech->content =~ m/URI="(?<uri>[^"]+?2500k[^"]+)"/gism) {
+												$url = $+{uri};
+												$uri =~ s/\/[^\/]+$/\//;
+												my $base_uri = $uri;
+												$uri = $base_uri . $url;
+												$self->doGet($uri);
+												if ($self->mech->success) {
+													my $lines = [split(/\n/, $self->mech->content)];
+													foreach my $l (@$lines) {
+														if ($l =~ m/\.ts$/ && $l !~ m/^#/) {
+															push @$chunks, $base_uri . $l;
+														}
+													}
+													print STDERR "Successfully found " . scalar @$chunks . " chunks\n";
+												} else {
+													die "Couldn't fetch IFRAME index file";
+												}
+											} else {
+												die "Can't find IFRAME index URI";
 											}
 										} else {
 											die "Unable to fetch chunk index file";

@@ -10,6 +10,11 @@ my $wrs = new WRS();
 my $episodes = $wrs->listEpisodesForSeason(2015, 2016);
 p($episodes);
 
-$wrs->getEpisodeChunkList($episodes->[0]->{id});
+my $chunks = $wrs->getEpisodeChunkList($episodes->[0]->{id});
 
-#http://www.pbs.org/woodwrightsshop/lunchbox_plugins/merlin_plugin/video_frame/2365554420/
+my $c_idx = 0;
+foreach my $c (@$chunks) {
+	print STDERR "Fetching $c\n";
+	my $cmd = "wget -O ./data/tmp/chunk_" . sprintf('%04d', ++$c_idx) . ".ts '$c'";
+	system($cmd);
+}
