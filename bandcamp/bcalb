@@ -6,8 +6,7 @@ use File::Slurp;
 use Data::Printer;
 use Getopt::Long;
 
-my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-                                                localtime(time);
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 
 my $file;
 my $album_year = $year + 1900;
@@ -17,7 +16,16 @@ GetOptions (
     "file=s"   => \$file
 );
 
-if (! $file || ! -f $file) {
+
+sub usage {
+    return "Usage:\n  bcalb --file <zip-file> [ --year <year> ]\n";
+}
+
+if (! $file) {
+    die usage();
+}
+
+if (! -f $file) {
     die "Can't read file\n";
 }
 
@@ -42,4 +50,3 @@ foreach my $f( @$files) {
     }
 }
 
-system('id3tool', $new_dir . '/*.mp3');
