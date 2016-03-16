@@ -49,10 +49,39 @@ class WRS {
 	}
 	
 	method doGet(Str $url) {
-		print STDERR "FETCHING: $url\n";
+		$self->logMsg("FETCHING: $url\n");
 		$self->mech->get($url);
-		print STDERR $self->mech->success ? "SUCCESS" : "FAIL";
-		print STDERR "\n";
+		#$self->logMsg($self->mech->success ? "SUCCESS" : "FAIL";
+		#$self->logMsg("\n";
+	}
+	
+	method logMsg($msg) {
+		print STDERR $msg;
+	}
+	
+	method grabEpisode(Int $episode_id, Str $output_file) {
+		my $chunks = $self->getEpisodeChunkList($episode_id);
+		my $c_idx = 0;
+		my $file_prefix = "./data/tmp/episode_" . $episode_id . "_chunk_";
+		foreach my $c (@$chunks) {
+			my $chunk_path = $file_prefix . sprintf('%04d', ++$c_idx) . ".ts";
+			if (-f $chunk_path) {
+				$self->logMsg('.');
+			} else {
+				$self->logMsg(" > Grabbing chunk $c_idx of " . scalar @$chunks . " to $chunk_path\n");
+				$self->mech->get($c);
+				$self->mech->save_content($chunk_path);
+			}
+		}
+		$self->logMsg("All chunks downloaded.  Merging...\n");
+		my $cmd = 'cat '. $file_prefix . '*.ts > "' . $output_file . '"';
+		print "$cmd\n";
+		system($cmd);
+		$self->logMsg("done.\n");
+		$cmd = 'rm ' . $file_prefix . '*.ts';
+		print "$cmd\n";
+		system($cmd);
+		
 	}
 	
 	method getEpisodeChunkList(Int $episode_id) {
@@ -93,12 +122,15 @@ class WRS {
 												$self->doGet($uri);
 												if ($self->mech->success) {
 													my $lines = [split(/\n/, $self->mech->content)];
+													my $used = {};
 													foreach my $l (@$lines) {
-														if ($l =~ m/\.ts$/ && $l !~ m/^#/) {
-															push @$chunks, $base_uri . $l;
+														my $chunk_uri = $base_uri . $l;
+														if ($l =~ m/\.ts$/ && $l !~ m/^#/ && !$used->{$chunk_uri}) {
+															$used->{$chunk_uri} = 1;
+															push @$chunks, $chunk_uri;
 														}
 													}
-													print STDERR "Successfully found " . scalar @$chunks . " chunks\n";
+													$self->logMsg("Successfully found " . scalar @$chunks . " chunks\n");
 												} else {
 													die "Couldn't fetch IFRAME index file";
 												}
