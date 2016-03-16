@@ -10,8 +10,14 @@ my $wrs = new WRS();
 my $episodes = $wrs->listEpisodesForSeason(2015, 2016);
 #p($episodes);
 
-$wrs->grabEpisode($episodes->[2]->{id}, './data/' . $episodes->[2]->{title} . '.mp4');
-
+foreach my $ep (@$episodes) {
+	my $file = './data/' . $ep->{title} . '.mp4';
+	if (-f $file) {
+		print STDERR "Already have $ep->{title}\n";
+	} else {
+		$wrs->grabEpisode($ep->{id}, $file);
+	}
+}
 #my $chunks = $wrs->getEpisodeChunkList($episodes->[1]->{id});
 #
 #my $c_idx = 0;
