@@ -7,17 +7,24 @@ use WRS;
 
 my $wrs = new WRS();
 
-my $episodes = $wrs->listEpisodesForSeason(2015, 2016);
+#my $episodes = $wrs->listEpisodesForSeason(2015, 2016);
 #p($episodes);
 
-foreach my $ep (@$episodes) {
-	my $file = './data/' . $ep->{title} . '.mp4';
-	if (-f $file) {
-		print STDERR "Already have $ep->{title}\n";
-	} else {
-		$wrs->grabEpisode($ep->{id}, $file);
-	}
-}
+$wrs->grabEpisode(2365554475, './data/The Woodwright\'s Shop - s35e08 - Bowl Carving with Peter Follansbee.mp4');
+$wrs->grabEpisode(2365554505, './data/The Woodwright\'s Shop - s35e09 - Hollows and Rounds.mp4');
+$wrs->grabEpisode(2365554510, './data/The Woodwright\'s Shop - s35e10 - Welsh Stick Chair I.mp4');
+$wrs->grabEpisode(2365554518, './data/The Woodwright\'s Shop - s35e11 - Welsh Stick Chair II.mp4');
+$wrs->grabEpisode(2365554522, './data/The Woodwright\'s Shop - s35e12 - Tool Smithing with Peter Ross.mp4');
+
+
+#foreach my $ep (@$episodes) {
+#	my $file = './data/' . $ep->{title} . '.mp4';
+#	if (-f $file) {
+#		print STDERR "Already have $ep->{title}\n";
+#	} else {
+#		$wrs->grabEpisode($ep->{id}, $file);
+#	}
+#}
 #my $chunks = $wrs->getEpisodeChunkList($episodes->[1]->{id});
 #
 #my $c_idx = 0;

@@ -5,6 +5,7 @@ use Moops;
 
 class WRS {
 	use Data::Printer;
+	use WWW::Mechanize;
 	use WWW::Mechanize::Cached;
 	use Web::Scraper;
 	use CHI;
@@ -15,9 +16,11 @@ class WRS {
 	
 	has 'mech' => (
 		is => 'rw',
-		isa => 'WWW::Mechanize::Cached',
+		#isa => 'WWW::Mechanize::Cached',
+		isa => 'WWW::Mechanize',
 		default => sub {
-			my $m = new WWW::Mechanize::Cached(
+			#my $m = new WWW::Mechanize::Cached(
+			my $m = new WWW::Mechanize(
 				agent => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36',
 				autocheck => 1
 			);
