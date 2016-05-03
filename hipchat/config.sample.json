@@ -5,7 +5,7 @@
 			"room_name": "HipChat API Sandbox",
 			"notification": {
 				"message": "/standup whatever I was doing yesterday",
-				"color": "red"
+				"color": "green"
 			}
 		}
 	]
