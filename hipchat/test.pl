@@ -4,7 +4,14 @@ use warnings;
 use WebService::HipChat;
 use File::Slurp;
 use JSON::XS;
-use Data::Printer;
+
+# You will need to install the above modules.  I would recommend getting cpanminus and using that
+#
+# $ curl -L https://cpanmin.us | perl - --sudo App::cpanminus
+#
+# ...then...
+#
+# $ sudo cpanm -v WebService::HipChat File::Slurp JSON::XS;
 
 my $cfg_file = 'config.json';
 
