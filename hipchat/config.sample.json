@@ -1,0 +1,12 @@
+{
+	"auth_token": "generate it here... https://<your-team-subdomain>.hipchat.com/account/api",
+	"tasks" : [
+		{
+			"room_name": "HipChat API Sandbox",
+			"notification": {
+				"message": "/standup whatever I was doing yesterday",
+				"color": "green"
+			}
+		}
+	]
+}
