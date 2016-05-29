@@ -1,0 +1,105 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Web::Scraper;
+use WWW::Mechanize;
+use Data::Printer;
+use lib './lib';
+use BC::UserProfile;
+use File::Slurp;
+use JSON::XS;
+
+{
+  my $ofh = select STDOUT;
+  $| = 1;
+  select $ofh;
+}
+
+{
+  my $ofh = select STDERR;
+  $| = 1;
+  select $ofh;
+}
+
+
+binmode STDOUT, ':utf8';
+binmode STDERR, ':utf8';
+
+my $occurences = {};
+
+my $cfg_file = 'config.json';
+if (! -f $cfg_file) {
+  die "First create config.json based on config.sample.json\n";
+}
+
+my $config = decode_json(read_file($cfg_file));
+
+
+my $users = $config->{users_to_list};
+foreach my $user (@$users) {
+  my $bc = new BC::UserProfile(user => $user);
+  print STDERR "Loading ${user}'s collection...\n";
+  my $collection = $bc->pullCollection();
+
+  my $cnt = scalar @{ $collection->{collection} };
+  print STDERR "Studying ${user}'s $cnt purchase" . ($cnt == 1 ? '' : 's') . "...\n";
+  
+  my $user_purchase = [grep {
+    $_->fetchAlbum();
+    
+    if ($_->released) {
+      if ($_->released->year eq 2016) {
+        print STDERR '+';
+        1;
+      } else {
+        print STDERR '-';
+        undef;
+      }
+    } else {
+      undef;
+    }
+  } @{ $collection->{collection} }];
+  print STDERR "\n";
+  
+  $cnt = scalar @{ $collection->{wishlist} };
+  print STDERR "Studying ${user}'s $cnt wishlist item" . ($cnt == 1 ? '' : 's') . "...\n";
+  
+  my $user_wishlist = [grep {
+    $_->fetchAlbum();
+    
+    if ($_->released) {
+      if ($_->released->year eq 2016) {
+        print STDERR '+';
+        1;
+      } else {
+        print STDERR '-';
+        undef;
+      }
+    } else {
+      undef;
+    }
+  } @{ $collection->{wishlist} }];
+  
+  print STDERR "\n";
+  print "\n";
+  print "${user}'s albums released in 2016:\n";
+  
+  map {
+    my $released_as = $_->band_name . ' - ' . $_->item_title;
+    $occurences->{$released_as}++;
+    print '    ' . $released_as . ' / ' . $_->released->strftime('%b %d, %Y') ."\n";
+  } sort {
+    lc($a->band_name) cmp lc($b->band_name) ||
+    lc($a->item_title) cmp lc($b->item_title)
+  } (@$user_purchase, @$user_wishlist);
+  
+  print STDERR "Found " . scalar @$user_purchase . ' 2016 release(s) in purchases, and ' . scalar @$user_wishlist . " 2016 release(s) in wishlist\n\n";
+  
+  print "\n\n";
+}
+
+
+print STDERR "\nOverall Statistics:\n";
+foreach my $release (sort { $occurences->{$a} <=> $occurences->{$b} } keys %$occurences) {
+  print STDERR "    $release has " . $occurences->{$release} . " fan(s)\n";
+}
