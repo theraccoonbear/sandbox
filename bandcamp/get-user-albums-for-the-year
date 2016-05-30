@@ -8,6 +8,7 @@ use lib './lib';
 use BC::UserProfile;
 use File::Slurp;
 use JSON::XS;
+use Getopt::Long;
 
 {
   my $ofh = select STDOUT;
@@ -100,6 +101,6 @@ foreach my $user (@$users) {
 
 
 print STDERR "\nOverall Statistics:\n";
-foreach my $release (sort { $occurences->{$a} <=> $occurences->{$b} } keys %$occurences) {
+foreach my $release (sort { $occurences->{$b} <=> $occurences->{$a} } keys %$occurences) {
   print STDERR "    $release has " . $occurences->{$release} . " fan(s)\n";
 }
