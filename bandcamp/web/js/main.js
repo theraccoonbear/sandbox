@@ -142,6 +142,8 @@ Controller.prototype.addReleaseToPicksList = function(release) {
 		$rel.remove();
 		ctxt.addReleaseToAllList(release);
 		ctxt.autoSave();
+		e.preventDefault();
+		e.stopPropagation();
 	}).on('click', function(e) {
 		ctxt.$all_releases.find('li').removeClass('selected');
 		ctxt.$aoty_picks.find('li').removeClass('selected');
@@ -158,6 +160,7 @@ Controller.prototype.addReleaseToAllList = function(release) {
 	var $rel = $('<li></li>');
 	$rel
 		.addClass('release')
+		.addClass(release.list)
 		.html(ctxt.render('album-entry', release))
 		.data('release', release)
 		.attr('data-url', release.item_url);
@@ -165,6 +168,8 @@ Controller.prototype.addReleaseToAllList = function(release) {
 	$rel.on('click', '.add-arrow', function(e) {
 		$rel.remove();
 		ctxt.addReleaseToPicksList(release);
+		e.preventDefault();
+		e.stopPropagation();
 	}).on('click', function(e) {
 		ctxt.$all_releases.find('li').removeClass('selected');
 		ctxt.$aoty_picks.find('li').removeClass('selected');
@@ -180,6 +185,9 @@ Controller.prototype.displayUserAlbums = function(username) {
 	var ctxt = this;
 	ctxt._current_user = username;
 	ctxt._auto_save = false;
+	
+	ctxt.$show_purchases.prop('checked', true);
+	ctxt.$show_wishlist.prop('checked', true);
 	
 	ctxt.block(`Loading picks for ${username}`);
 	ctxt.getListForUser(username, function(list) {
@@ -222,6 +230,22 @@ Controller.prototype.eventHandlers = function() {
 	ctxt.$user_picker.on('change', function(e) {
 		var sel = ctxt.$user_picker.val();
 		ctxt.displayUserAlbums(sel);
+	});
+	
+	ctxt.$show_wishlist.on('change', function(e) {
+		if (ctxt.$show_wishlist.is(':checked')) {
+			ctxt.$all_releases.find('li.wishlist').show();
+		} else {
+			ctxt.$all_releases.find('li.wishlist').hide();
+		}
+	});
+	
+	ctxt.$show_purchases.on('change', function(e) {
+		if (ctxt.$show_purchases.is(':checked')) {
+			ctxt.$all_releases.find('li.collection').show();
+		} else {
+			ctxt.$all_releases.find('li.collection').hide();
+		}
 	});
 };
 
