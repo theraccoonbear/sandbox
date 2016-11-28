@@ -35,14 +35,22 @@ class BC {
 		default => sub { return []; }
 	);
 	
+	has 'cache_age' => (
+		is => 'rw',
+		isa => 'Str',
+		default => '1 week'
+	);
+	
 	has 'mech' => (
 		is => 'rw',
 		isa => 'WWW::Mechanize::Cached',
 		default => sub {
+			my $self = shift @_;
+			
 			my $cache = CHI->new(
 				driver	 => 'File',
 				root_dir => "$FindBin::Bin/tmp",
-				expires_in => '1 day'
+				expires_in => $self->cache_age
 			);
 			
 			my $m = new WWW::Mechanize::Cached(
@@ -69,8 +77,6 @@ class BC {
 	}
 	
 	method debug_msg(Str $msg, Bool $newline = 1) {
-		#$newline = defined $newline ? $newline : 1;
-		
 		if ($self->debug) {
 			print STDERR $msg . ($newline ? "\n" : '');
 		}

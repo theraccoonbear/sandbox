@@ -10,4 +10,4 @@ Save a copy of `config.sample.json` as `config.json`, editing the `users_to_list
 ![Terminal Demo](https://raw.githubusercontent.com/theraccoonbear/sandbox/master/bandcamp/terminal-demo.gif "Terminal Demo")
 
 ### TODO:
- * Make year changeable through `config.json` and/or a `--year | -y` command line argument.
+ * Nothing!

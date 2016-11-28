@@ -22,6 +22,11 @@ class BC::Artist extends BC {
     }
   );
   
+	has 'cache_age' => (
+		is => 'rw',
+		isa => 'Str',
+		default => '1 month'
+	);
   
   method fetchArtist() {
 

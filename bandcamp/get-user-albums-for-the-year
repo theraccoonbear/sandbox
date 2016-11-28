@@ -9,6 +9,7 @@ use BC::UserProfile;
 use File::Slurp;
 use JSON::XS;
 use Getopt::Long;
+use Text::Handlebars;
 
 {
   my $ofh = select STDOUT;
@@ -26,6 +27,20 @@ use Getopt::Long;
 binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
+my $json = JSON::XS->new->utf8->space_after;
+$json->convert_blessed(1);
+
+my $handlebars = Text::Handlebars->new(
+	#helpers => {
+	#	fullName => sub {
+	#		my ($context, $person) = @_;
+	#		return $person->{firstName}
+	#			. ' '
+	#			. $person->{lastName};
+	#	},
+	#},
+);
+
 my $occurences = {};
 
 my $cfg_file = 'config.json';
@@ -35,6 +50,16 @@ if (! -f $cfg_file) {
 
 my $config = decode_json(read_file($cfg_file));
 
+
+
+my $search_year = (localtime())[5] + 1900;
+
+GetOptions (
+	"year=i" => \$search_year
+);
+
+
+my $user_data_index = [];
 
 my $users = $config->{users_to_list};
 foreach my $user (@$users) {
@@ -49,7 +74,7 @@ foreach my $user (@$users) {
     $_->fetchAlbum();
     
     if ($_->released) {
-      if ($_->released->year eq 2016) {
+      if ($_->released->year eq $search_year) {
         print STDERR '+';
         1;
       } else {
@@ -69,7 +94,7 @@ foreach my $user (@$users) {
     $_->fetchAlbum();
     
     if ($_->released) {
-      if ($_->released->year eq 2016) {
+      if ($_->released->year eq $search_year) {
         print STDERR '+';
         1;
       } else {
@@ -83,7 +108,7 @@ foreach my $user (@$users) {
   
   print STDERR "\n";
   print "\n";
-  print "${user}'s albums released in 2016:\n";
+  print "${user}'s albums released in $search_year:\n";
   
   map {
     my $released_as = $_->band_name . ' - ' . $_->item_title;
@@ -94,9 +119,14 @@ foreach my $user (@$users) {
     lc($a->item_title) cmp lc($b->item_title)
   } (@$user_purchase, @$user_wishlist);
   
-  print STDERR "Found " . scalar @$user_purchase . ' 2016 release(s) in purchases, and ' . scalar @$user_wishlist . " 2016 release(s) in wishlist\n\n";
-  
+  print STDERR "Found " . scalar @$user_purchase . " $search_year release(s) in purchases, and " . scalar @$user_wishlist . " $search_year release(s) in wishlist\n\n";
   print "\n\n";
+	
+	my $filename = "user-${user}-wishlist.json";
+	my $filepath = "./data/$filename";
+	push @$user_data_index, { user => $user, data => $filename };
+	write_file($filepath, $json->encode($collection));
+	write_file('./data/index.json', $json->encode($user_data_index));
 }
 
 

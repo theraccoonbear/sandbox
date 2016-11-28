@@ -1,0 +1,51 @@
+#!/usr/bin/env perl ../sgen.pl
+---
+settings:
+  db:
+    type: pg
+  schema: recithieves
+  generators:
+    - type: SQL
+
+fields:
+  all:     # every table gets these
+  - name: id
+    unique: true
+  - name: created
+  - name: modified
+  - name: archived
+    type: boolean
+    def: 0
+    
+tables:         # table specific columns
+  - &sources
+    name: sources
+    fields:
+      - name: slug
+      - name: name
+      - name: base_url
+  
+  - &recipes
+    name: recipes
+    fields:
+      - name: source_id
+        ref: *sources
+        type: source.id
+      - name: title
+      - name: description
+        type: text
+      - name: serves
+      - name: photo
+      - name: directions
+        type: text
+        def: "[]"
+  
+  - &ingredients
+    name: ingredients
+    fields:
+      - ref: *recipes
+      - name: name
+      - name: qty
+        type: int(10)
+      - name: unit
+      

@@ -30,6 +30,13 @@ class BC::UserProfile extends BC {
 		default => sub { return []; }
 	);
 	
+	method TO_JSON() {
+		return {
+			collection => $self->collection,
+			wishlist => $self->wishlist
+		};
+	}
+	
 	
 	method pullCollection() {
 		my $url = $self->base_url . $self->user;
@@ -60,8 +67,7 @@ class BC::UserProfile extends BC {
 		
 		$self->debug_msg("Building collection");
 		
-		my $udec = unidecode($+{json});
-		my $collection = $self->json->decode($udec);
+		my $collection = $self->json->decode($+{json});
 		foreach my $item_id (keys %{ $collection->{item_details} }) {
 			my $item = $collection->{item_details}->{$item_id};
 			$item->{debug} = $self->debug;

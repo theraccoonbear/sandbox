@@ -1,0 +1,23 @@
+package {{ schemaName }}::Schema::Result::{{ tableName }};
+use base qw/DBIx::Class::Core/;
+
+__PACKAGE__->table('{{ tableName }}');
+__PACKAGE__->add_columns(qw/ {{ regularColumns }} /);
+__PACKAGE__->set_primary_key('id');
+{{#each has_many}}
+__PACKAGE__->has_many({{ hasManyName }} => '{{ schemaName }}::Schema::Result::{{ tableName }}', 'artistid');
+{{/each}}
+ 
+1;
+A result class to represent a CD, which belongs to an artist, in MyApp/Schema/Result/CD.pm:
+
+package MyApp::Schema::Result::CD;
+use base qw/DBIx::Class::Core/;
+ 
+__PACKAGE__->load_components(qw/InflateColumn::DateTime/);
+__PACKAGE__->table('cd');
+__PACKAGE__->add_columns(qw/ cdid artistid title year /);
+__PACKAGE__->set_primary_key('cdid');
+__PACKAGE__->belongs_to(artist => 'MyApp::Schema::Result::Artist', 'artistid');
+ 
+1;

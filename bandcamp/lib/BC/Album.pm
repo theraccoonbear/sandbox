@@ -21,8 +21,13 @@ class BC::Album extends BC {
 	
 	has 'id' => (
 		is => 'rw',
-		isa => 'Int',
+		isa => 'Maybe[Int]',
 		alias => 'item_id'
+	);
+	
+	has 'cover' => (
+		is => 'rw',
+		isa => 'Maybe[Str]'
 	);
 	
 	has 'item_title' => (
@@ -50,16 +55,33 @@ class BC::Album extends BC {
 		}
 	);
 	
+	
 	has 'released' => (
 		is => 'rw',
 		isa => 'Maybe[Time::Piece]'
 	);
+	
+	has 'cache_age' => (
+		is => 'rw',
+		isa => 'Str',
+		default => '1 month'
+	);
+	
 	
 	has 'albumScraper' => (
 		is => 'rw',
 		isa => 'Web::Scraper',
 		default => sub {
 			return scraper {
+				#  <meta property="twitter:player" content="https://bandcamp.com/EmbeddedPlayer/v=2/album=3216549634/size=large/linkcol=0084B4/notracklist=true/twittercard=true/">
+				process 'meta[property="twitter:player"]', 'album_id' => sub {
+					my $url = $_->attr('content');
+					$url =~ s/^.+?\/album=(\d+)\/.+$/$1/gi;
+					if ($url !~ m/^\d+$/) {
+						$url = undef;
+					}
+					return $url;
+				};
 				process 'h2.trackTitle', 'title' => sub { return $_->as_trimmed_text(); };
 				process 'span[itemprop="byArtist"] a', 'artist_name' => 'TEXT', 'artist_url' => '@href';
 				process 'tr[itemprop="tracks"]', 'tracks[]' => scraper {
@@ -75,6 +97,7 @@ class BC::Album extends BC {
 						return ($m * 60) + ($s * 1);
 					};
 				};
+				process '#tralbumArt a', 'cover' => '@href';
 				process '.tralbum-credits', 'released' => sub {
 					my $val = $_->as_trimmed_text();
 					$val =~ s/release[ds]\s*//;
@@ -85,6 +108,19 @@ class BC::Album extends BC {
 			}
 		}
 	);
+	
+	method TO_JSON() {
+		return {
+			band => $self->band,
+			id => $self->id,
+			cover => $self->cover,
+			item_title => $self->item_title,
+			band_name => $self->band_name,
+			item_url => $self->item_url,
+			tracks => $self->tracks,
+			released => $self->released ? $self->released->datetime : undef
+		};
+	}
 	
 	method fetchAlbum() {
 		$self->debug_msg("Fetching album " . $self->item_title . ' by ' . $self->band_name);
@@ -98,10 +134,12 @@ class BC::Album extends BC {
 		$self->debug_msg($self->mech->is_cached ? 'YES' : 'NO');
 		
 		my $results = $self->albumScraper->scrape($self->mech->content);
+		$self->id($results->{album_id});
 		$self->band_name($results->{artist_name});
 		$self->tracks($results->{tracks});
 		$self->item_title($results->{title});
 		$self->released($results->{released});
+		$self->cover($results->{cover});
 		return 1;
 	
 	}

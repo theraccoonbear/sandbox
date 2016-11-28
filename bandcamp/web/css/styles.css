@@ -1,0 +1,91 @@
+body {
+	overflow: hidden;
+}
+
+.album-list {
+	height: 100%;
+	overflow: scroll;
+}
+
+.album-list .user-collection {
+	font-weight: bold;
+}
+
+.album-list li {
+	cursor: pointer;
+	font-size: 16px;
+	padding: 4px;
+	border: 1px solid #fff;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	-webkit-transition: background-color 100ms linear;
+	-moz-transition: background-color 100ms linear;
+	-o-transition: background-color 100ms linear;
+	-ms-transition: background-color 100ms linear;
+	transition: background-color 100ms linear;
+	-webkit-transition: color 100ms linear;
+	-moz-transition: color 100ms linear;
+	-o-transition: color 100ms linear;
+	-ms-transition: color 100ms linear;
+	transition: color 100ms linear;
+}
+
+.album-list li.selected {
+	border: 1px dashed #888;
+	background-color: #ddd;
+}
+
+.album-list li .arrow {
+	display: inline-block;
+}
+
+.album-list li .add-arrow {
+	visibility: hidden;
+	float: right;
+}
+
+.album-list li .remove-arrow {
+	visibility: hidden;
+	float: right;
+}
+
+.album-list li:hover {
+	background: #000;
+	color: #fff;
+}
+
+.album-list li:hover .arrow {
+	visibility: visible;
+}
+
+#focus_release {
+
+}
+
+.album .cover {
+}
+
+.album .cover img {
+	max-height: 100%;
+	width: 100%;
+	object-fit: contain;
+}
+
+.modal-overlay {
+	position: fixed;
+	left: 0;
+	width: 100%;
+	top: 0;
+	height: 100%;
+	background-color: #000;
+	z-index: 10000;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.modal-overlay .message {
+	color: #fff;
+	font-size: 48px;
+	vertical-align: middle;
+}
