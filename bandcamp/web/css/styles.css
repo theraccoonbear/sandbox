@@ -1,5 +1,5 @@
-body {
-	overflow: hidden;
+.container {
+	width: 100% !important;
 }
 
 .album-list {
@@ -89,3 +89,4 @@ body {
 	font-size: 48px;
 	vertical-align: middle;
 }
+

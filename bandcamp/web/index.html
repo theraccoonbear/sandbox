@@ -15,37 +15,39 @@
 		<div id="modal_overlay" class="modal-overlay">
 			<div id="overlay_message" class="message"></div>
 		</div>
-		<div class="row">
-			<div class="col-xs-1">
-				<label for="user_picker">
-					User:
-				</label>
-			</div>
-			<div class="col-xs-3">
-				<select id="user_picker">
-				</select>
-			</div>
-		</div>
-		
-		<div class="row">
-			<div class="col-xs-4 col-sm-3 col-md-2 affix">
-				 <div id="focus_release"></div>
-			</div>
-			<div class="col-xs-4 col-sm-3 col-md-2">
-			</div>
-			<div class="col-xs-4 col-md-5">
-				<h2>All 2016 Records</h2>
-				<div class="filters">
-					<label for="show_purchases" title="Show purchases"><input type="checkbox" id="show_purchases" checked="checked"> P</label>
-					<label for="show_wishlist" title="Show whishlist"><input type="checkbox" id="show_wishlist" checked="checked"> W</label>
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-1">
+					<label for="user_picker">
+						User:
+					</label>
 				</div>
-				<ul class="album-list" id="all_releases"></ul>
+				<div class="col-xs-3">
+					<select id="user_picker">
+					</select>
+				</div>
 			</div>
-			<div class="col-xs-4 col-md-5">
-				<h2>2016 Picks</h2>
-				<ol class="album-list" id="aoty_picks"></ol>
+			
+			<div class="row">
+				<div class="col-xs-4 col-sm-3 col-md-2 affix">
+					 <div id="focus_release"></div>
+				</div>
+				<div class="col-xs-4 col-sm-3 col-md-2">
+				</div>
+				<div class="col-xs-4 col-md-5">
+					<h2>All 2016 Records</h2>
+					<div class="filters">
+						<label for="show_purchases" title="Show purchases"><input type="checkbox" id="show_purchases" checked="checked"> P</label>
+						<label for="show_wishlist" title="Show whishlist"><input type="checkbox" id="show_wishlist" checked="checked"> W</label>
+					</div>
+					<ul class="album-list" id="all_releases"></ul>
+				</div>
+				<div class="col-xs-4 col-md-5">
+					<h2>2016 Picks</h2>
+					<ol class="album-list" id="aoty_picks"></ol>
+				</div>
 			</div>
-		</div>
+		</div><!-- .container -->
 		
 		<script type="text/x-handlebars" id="album-display">
 			{{#if id}}
