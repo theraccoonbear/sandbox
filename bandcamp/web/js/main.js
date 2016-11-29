@@ -203,7 +203,8 @@ Controller.prototype.displayUserAlbums = function(username) {
 		});
 		
 		$.each(list, function(idx, rel_url) {
-			var $list_item = ctxt.$all_releases.find('[data-url="' + rel_url + '"]');
+			var alt_url = rel_url.replace(/^http:/, 'https:');
+			var $list_item = ctxt.$all_releases.find('[data-url="' + rel_url + '"], [data-url="' + alt_url + '"]');
 			if ($list_item.length > 0) {
 				var release = $list_item.data('release');
 				$list_item.remove();

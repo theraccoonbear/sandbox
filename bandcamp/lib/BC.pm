@@ -15,6 +15,7 @@ class BC {
 	use Encode qw(encode_utf8 decode_utf8);
 	use JSON::PP;
 	use POSIX;
+	use IO::Socket::SSL;
 
 	
 	has 'base_url' => (
@@ -56,9 +57,13 @@ class BC {
 			my $m = new WWW::Mechanize::Cached(
 				agent => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36',
 				autocheck => 0,
-				cache => $cache
+				cache => $cache,
+				ssl_opts => {
+					SSL_verify_mode => IO::Socket::SSL::SSL_VERIFY_NONE,
+					verify_hostname => 0
+				}
 			);
-			$m->max_redirect(0);
+			#$m->max_redirect(0);
 			return $m;
 		}
 	);

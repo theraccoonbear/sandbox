@@ -71,11 +71,13 @@ class BC::UserProfile extends BC {
 		foreach my $item_id (keys %{ $collection->{item_details} }) {
 			my $item = $collection->{item_details}->{$item_id};
 			$item->{debug} = $self->debug;
-			my $album = new BC::Album($item);
-			if ($item->{sale_item_id} ne '') {
-				push @{ $self->collection }, $album;
-			} else {
-				push @{ $self->wishlist}, $album;
+			if (!$item->{is_private}) {
+				my $album = new BC::Album($item);
+				if ($item->{sale_item_id} ne '') {
+					push @{ $self->collection }, $album;
+				} else {
+					push @{ $self->wishlist}, $album;
+				}
 			}
 		}
 		$self->debug_msg("OK");

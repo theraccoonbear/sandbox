@@ -123,10 +123,13 @@ class BC::Album extends BC {
 	}
 	
 	method fetchAlbum() {
+		(my $url = $self->item_url) =~ s/^http:/https:/;
+		$self->item_url($url);
 		$self->debug_msg("Fetching album " . $self->item_title . ' by ' . $self->band_name);
 		$self->fetch($self->item_url);
 		if (!$self->mech->success) {
 			$self->debug_msg("Couldn't load");
+			#p($self->mech);
 			return undef;
 		}
 		
