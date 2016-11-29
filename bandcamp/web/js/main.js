@@ -106,9 +106,9 @@ Controller.prototype.loadUser = function(username, url, cb) {
 			return 0;
 		});
 		
-		if (ctxt.$user_picker.find('option').length === 1) {
-			ctxt.displayUserAlbums(username);
-		}
+		//if (ctxt.$user_picker.find('option').length === 1) {
+		//	ctxt.displayUserAlbums(username);
+		//}
 		
 		cb();
 	});
@@ -184,6 +184,7 @@ Controller.prototype.addReleaseToAllList = function(release) {
 Controller.prototype.displayUserAlbums = function(username) {
 	var ctxt = this;
 	ctxt._current_user = username;
+	this.remember('viewing-user', username);
 	ctxt._auto_save = false;
 	
 	ctxt.$show_purchases.prop('checked', true);
@@ -283,10 +284,30 @@ Controller.prototype.loadAllUsers = function(users, cb) {
 			ctxt.loadAllUsers(users, cb);
 		} else {
 			ctxt.unblock();
+			var user = ctxt.recall('viewing-user');
+			if (user && typeof ctxt._users[user] !== 'undefined') {
+				ctxt.$user_picker.val(user);
+				ctxt.displayUserAlbums(user);
+			}
 			cb();
 		}
-	});	
+	});
 };
+
+Controller.prototype.remember = function(k, v) {
+	if (localStorage && typeof localStorage !== 'undefined') {
+		localStorage.setItem(k, v);
+		return true;
+	}
+	return false;
+};
+
+
+Controller.prototype.recall = function(k) {
+	if (localStorage && typeof localStorage !== 'undefined') {
+		return localStorage.getItem(k);
+	}
+}
 
 Controller.prototype.init = function(cb) {
 	var ctxt = this;
