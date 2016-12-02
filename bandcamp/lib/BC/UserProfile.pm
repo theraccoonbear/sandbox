@@ -30,6 +30,10 @@ class BC::UserProfile extends BC {
 		default => sub { return []; }
 	);
 	
+	has '+cache_age' => (
+		default => '1 month'
+	);
+	
 	method TO_JSON() {
 		return {
 			collection => $self->collection,

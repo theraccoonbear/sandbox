@@ -1,0 +1,163 @@
+body {
+	margin: 0;
+	padding: 0;
+}
+
+.container {
+	width: 100% !important;
+}
+
+.album-list {
+	height: 100%;
+	overflow: scroll;
+}
+
+.album-list .user-collection {
+	font-weight: bold;
+}
+
+.album-list li {
+	cursor: pointer;
+	font-size: 16px;
+	padding: 4px;
+	border: 1px solid #fff;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	-webkit-transition: background-color 100ms linear;
+	-moz-transition: background-color 100ms linear;
+	-o-transition: background-color 100ms linear;
+	-ms-transition: background-color 100ms linear;
+	transition: background-color 100ms linear;
+	-webkit-transition: color 100ms linear;
+	-moz-transition: color 100ms linear;
+	-o-transition: color 100ms linear;
+	-ms-transition: color 100ms linear;
+	transition: color 100ms linear;
+}
+
+.album-list li.selected {
+	border: 1px dashed #888;
+	background-color: #ddd;
+}
+
+.album-list li .arrow {
+	display: inline-block;
+}
+
+.album-list li .add-arrow {
+	visibility: hidden;
+	float: right;
+}
+
+.album-list li .remove-arrow {
+	visibility: hidden;
+	float: right;
+}
+
+.album-list li:hover {
+	background: #000;
+	color: #fff;
+}
+
+.album-list li:hover .arrow {
+	visibility: visible;
+}
+
+#focus_release {
+
+}
+
+.album .cover {
+}
+
+.album .cover img {
+	max-height: 100%;
+	width: 100%;
+	object-fit: contain;
+}
+
+.modal-overlay {
+	position: fixed;
+	left: 0;
+	width: 100%;
+	top: 0;
+	height: 100%;
+	background-color: #000;
+	z-index: 10000;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.modal-overlay .message {
+	color: #fff;
+	font-size: 48px;
+	vertical-align: middle;
+}
+
+.row {
+	width: 100%;
+	/*border: 1px solid red;*/
+}
+
+.col-1, .col-2, .col-3, .col-4,
+.col-5, .col-6, .col-7, .col-8,
+.col-9, .col-10, .col-11, .col-12 {
+	float: left;
+	margin: 0;
+	padding: 0;
+	/*border: 1px solid green;*/
+	/*height: 100%;*/
+}
+
+.col-1 {
+	width: 8.33333%;
+}
+
+.col-2 {
+	width: 16.66666%;
+}
+
+.col-3 {
+	width: 25%;
+}
+
+.col-4 {
+	width: 33.33333%;
+}
+
+.col-5 {
+	width: 41.66666%;
+}
+
+.col-6 {
+	width: 50%;
+}
+
+.col-7 {
+	width: 58.33333%;
+}
+
+.col-8 {
+	width: 66.66666%;
+}
+
+.col-9 {
+	width: 75%;
+}
+
+.col-10 {
+	width: 83.33333%;
+}
+
+.col-11 {
+	width: 91.66666%;
+}
+
+.col-12 {
+	width: 100%;
+}
+
+.clear-all {
+	clear: both;
+}

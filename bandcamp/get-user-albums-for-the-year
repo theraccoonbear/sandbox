@@ -61,6 +61,8 @@ GetOptions (
 
 my $user_data_index = [];
 
+my $ts = time();
+
 my $users = $config->{users_to_list};
 foreach my $user (@$users) {
   my $bc = new BC::UserProfile(user => $user);
@@ -124,13 +126,15 @@ foreach my $user (@$users) {
 	
 	my $filename = "user-${user}-wishlist.json";
 	my $filepath = "./data/$filename";
-	push @$user_data_index, { user => $user, data => $filename };
+	push @$user_data_index, { user => $user, data => $filename . '?_cache_buster=' . $ts };
 	write_file($filepath, $json->encode($collection));
 	write_file('./data/index.json', $json->encode($user_data_index));
 }
 
 
 print STDERR "\nOverall Statistics:\n";
+print "\nOverall Statistics:\n";
 foreach my $release (sort { $occurences->{$b} <=> $occurences->{$a} } keys %$occurences) {
   print STDERR "    $release has " . $occurences->{$release} . " fan(s)\n";
+	print "    $release has " . $occurences->{$release} . " fan(s)\n";
 }

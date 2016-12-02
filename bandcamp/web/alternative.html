@@ -1,0 +1,97 @@
+<html>
+	<head>
+		<!-- Latest compiled and minified CSS -->
+		<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+		
+		<!-- Optional theme -->
+		<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
+		<link rel="stylesheet" href="css/jquery-ui.min.css">
+		<link rel="stylesheet" href="css/alternative.css">
+		<title>
+			Slacker AOTY Builder
+		</title>
+	</head>
+	<body>
+		<div id="modal_overlay" class="modal-overlay">
+			<div id="overlay_message" class="message"></div>
+		</div>
+		<div class="container">
+			
+			<div class="row navigation">
+				<div class="col-3">
+					<label for="user_picker">
+						User: <select id="user_picker"></select>
+					</label>
+				</div>
+				<div class="col-9">
+					<a href="docs/2016-bandcamp-albums.txt" target="_blank">Full User Collection Lists and Album Popularity</a>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-4">
+					 <div id="focus_release"></div>
+				</div>
+				<div class="col-4">
+					<h2>All 2016 Records</h2>
+					<div class="filters">
+						<label for="show_purchases" title="Show purchases"><input type="checkbox" id="show_purchases" checked="checked"> P</label>
+						<label for="show_wishlist" title="Show whishlist"><input type="checkbox" id="show_wishlist" checked="checked"> W</label>
+					</div>
+					<ul class="album-list" id="all_releases"></ul>
+				</div>
+				<div class="col-4">
+					<h2>2016 Picks</h2>
+					<ol class="album-list" id="aoty_picks"></ol>
+				</div>
+			</div>
+			
+			<div class="clear-all"></div>
+		</div><!-- .container -->
+		
+		<script type="text/x-handlebars" id="album-display">
+			{{#if id}}
+			<iframe style="border: 0; width: 100%; height: 100%;" src="https://bandcamp.com/EmbeddedPlayer/album={{id}}/size=large/bgcol=ffffff/linkcol=0687f5/transparent=true/" seamless><a href="{{item_url}}">{{item_title}} by {{band_name}}</a></iframe>
+			{{else}}
+			<h2><em>{{item_title}}</em> <span class="hidden-sm-up"><br></span><strong>{{band_name}}</strong></h2>
+			<div class="album">
+				<div class="cover">
+					<img src="{{cover}}">
+				</div>
+				<ul class="details">
+					<li class="bandcamp"><a href="{{item_url}}" target="_blank">Bandcamp</a></li>
+				</ul>
+				<ol class="track-list">
+					{{#each tracks}}
+						<li>{{name}}</li>
+					{{/each}}
+				</ol>
+			</div>
+			{{/if}}
+		</script>
+		
+		<script type="text/x-handlebars" id="album-entry">
+			<div class="user-{{list}}">
+				<span class="artist">{{band_name}}</span> - <span class="album">{{item_title}}</span>
+				<div class="add-arrow arrow btn btn-xs btn-primary"><span class="glyphicon glyphicon-plus"></span> <span class="hidden-md-down">Add</span></div>
+			</div>
+		</script>
+		
+		<script type="text/x-handlebars" id="pick-entry">
+			<div class="user-{{list}}">
+				<span class="handle glyphicon glyphicon-menu-hamburger"></span>
+				<span class="artist">{{band_name}}</span> - <span class="album">{{item_title}}</span>
+				<div class="remove-arrow arrow btn btn-xs btn-danger"><span class="glyphicon glyphicon-remove"></span> <span class="hidden-md-down">Remove</span></div>
+			</div>
+		</script>
+		
+		<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		<script src="js/jquery-ui.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js" integrity="sha256-lsnwFhrNhbBmHfkBv9qFeiUVHti2+DmL0F1K5pysQsM=" crossorigin="anonymous"></script>
+		<script src="http://sirest.bhffc.com/js/class.js"></script>
+		<script src="http://sirest.bhffc.com/js/sjcl.js"></script>
+		<script src="http://sirest.bhffc.com/sirest.js"></script>
+		<script src="js/main.js"></script>
+	</body>
+</html>

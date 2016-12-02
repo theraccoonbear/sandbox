@@ -61,9 +61,7 @@ class BC::Album extends BC {
 		isa => 'Maybe[Time::Piece]'
 	);
 	
-	has 'cache_age' => (
-		is => 'rw',
-		isa => 'Str',
+	has '+cache_age' => (
 		default => '1 month'
 	);
 	

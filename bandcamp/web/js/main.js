@@ -6,6 +6,9 @@ var Controller = function() {
 	this._current_user = undefined;
 	this._templates = {};
 	this._auto_save = true;
+	this._timeout= undefined;
+	this._keep_alive_interval = 1000 * 60 * 5;
+	this._id = [(new Date()).getTime(), Math.round(Math.random() * 1000000)].join('-');
 	
 	var ctxt = this;
 	
@@ -144,11 +147,18 @@ Controller.prototype.addReleaseToPicksList = function(release) {
 		ctxt.autoSave();
 		e.preventDefault();
 		e.stopPropagation();
-	}).on('click', function(e) {
+	}).on('click', '.listen-button', function(e) {
 		ctxt.$all_releases.find('li').removeClass('selected');
 		ctxt.$aoty_picks.find('li').removeClass('selected');
-		$(this).addClass('selected');
+		$(this).closest('li').addClass('selected');
 		ctxt.$focus_release.html(ctxt.render('album-display', release));
+		e.preventDefault();
+		e.stopPropagation();
+	}).on('click', function(e) {
+		var $this = $(this);
+		ctxt.$all_releases.find('li').not($this).removeClass('hover');
+		ctxt.$aoty_picks.find('li').not($this).removeClass('hover');
+		$this.addClass('hover');
 	});
 	
 	ctxt.$aoty_picks.append($rel);
@@ -170,12 +180,18 @@ Controller.prototype.addReleaseToAllList = function(release) {
 		ctxt.addReleaseToPicksList(release);
 		e.preventDefault();
 		e.stopPropagation();
-	}).on('click', function(e) {
+	}).on('click', '.listen-button', function(e) {
 		ctxt.$all_releases.find('li').removeClass('selected');
 		ctxt.$aoty_picks.find('li').removeClass('selected');
-		$(this).addClass('selected');
-		
+		$(this).closest('li').addClass('selected');
 		ctxt.$focus_release.html(ctxt.render('album-display', release));
+		e.preventDefault();
+		e.stopPropagation();
+	}).on('click', function(e) {
+		var $this = $(this);
+		ctxt.$all_releases.find('li').not($this).removeClass('hover');
+		ctxt.$aoty_picks.find('li').not($this).removeClass('hover');
+		$this.addClass('hover');
 	});
 	
 	ctxt.$all_releases.append($rel);
@@ -284,7 +300,7 @@ Controller.prototype.loadAllUsers = function(users, cb) {
 		if (users.length > 0) {
 			ctxt.loadAllUsers(users, cb);
 		} else {
-			ctxt.unblock();
+			//ctxt.unblock();
 			var user = ctxt.recall('viewing-user');
 			if (user && typeof ctxt._users[user] !== 'undefined') {
 				ctxt.$user_picker.val(user);
@@ -325,13 +341,28 @@ Controller.prototype.init = function(cb) {
 	
 	ctxt.log("Loading user index...");
 	ctxt.block("Loading user index...");
-	$.getJSON('data/index.json', {}, function(d, s, x) {
+	$.getJSON('data/index.json?_cache_buster=' + (new Date()).getTime(), {}, function(d, s, x) {
 		ctxt.block("index loaded.");
 		ctxt._users = {};
 		ctxt.$all_releases.empty();
 		ctxt.$user_picker.empty();
 		ctxt.loadAllUsers(d, cb);
 	});
+	
+	var keepAlive = function() {
+		sirest.store(ctxt._id + '.aoty-keep-alive', (new Date()).getTime(), {
+			callback: function(resp) {
+				if (resp.success) {
+					ctxt.log("Keep alive succeeded");
+				} else {
+					ctxt.log("Keep alive FAILED!");
+				}
+				ctxt._timeout = setTimeout(keepAlive, ctxt._keep_alive_interval);
+			}
+		});
+	};
+	
+	keepAlive();
 };
 
 Controller.prototype.log = function() {

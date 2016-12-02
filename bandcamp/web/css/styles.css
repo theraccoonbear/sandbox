@@ -1,20 +1,30 @@
+body {
+	counter-reset: pick-list-item;
+}
+
 .container {
 	width: 100% !important;
 }
 
 .album-list {
-	height: 100%;
-	overflow: scroll;
+
 }
 
 .album-list .user-collection {
 	font-weight: bold;
 }
 
+.all-releases-list {
+	margin-left: -35px;
+	list-style: none;
+	list-style-type: none;
+}
+
 .album-list li {
-	cursor: pointer;
-	font-size: 16px;
-	padding: 4px;
+	font-size: 18px;
+	padding: 5px;
+	margin-bottom: 5px;
+	min-height: 40px;
 	border: 1px solid #fff;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
@@ -31,31 +41,70 @@
 	transition: color 100ms linear;
 }
 
+.album-list li:nth-child(even) {
+	background: #ddd;
+}
+.album-list li:nth-child(odd) {
+	background: #fff;
+}
+
 .album-list li.selected {
 	border: 1px dashed #888;
 	background-color: #ddd;
 }
 
-.album-list li .arrow {
+.album-list li .actions {
 	display: inline-block;
-}
-
-.album-list li .add-arrow {
 	visibility: hidden;
 	float: right;
+	cursor: pointer;
 }
 
-.album-list li .remove-arrow {
-	visibility: hidden;
-	float: right;
+.album-list li .handle {
+	cursor: pointer;	
 }
 
-.album-list li:hover {
-	background: #000;
+.album-list li .actions .btn {
+	min-width: 60px;
+}
+
+.album-list li.hover {
+	background: #555;
 	color: #fff;
 }
 
-.album-list li:hover .arrow {
+.album {
+	font-style: italic;
+}
+
+.album-list li:hover {
+	background: #000 !important;
+	color: #fff !important;
+}
+
+.aoty-picks-list {
+	list-style: none;
+}
+
+.aoty-picks-list li {
+	padding-left: 5px;
+}
+
+.aoty-picks-list li:before {
+	counter-increment: pick-list-item;
+	content: counter(pick-list-item) ". ";
+	color: #000;
+}
+
+.aoty-picks-list li:hover:before {
+	color: #fff;
+}
+
+.aoty-picks-list li.hover:before {
+	color: #fff;
+}
+
+.album-list li:hover .arrow, .album-list li.hover .arrow  {
 	visibility: visible;
 }
 
@@ -63,13 +112,18 @@
 
 }
 
-.album .cover {
+/*.album .cover {
 }
 
 .album .cover img {
 	max-height: 100%;
 	width: 100%;
 	object-fit: contain;
+}*/
+
+.cover.thumb {
+	max-width: 100%;
+	max-height: 100%;
 }
 
 .modal-overlay {
@@ -88,5 +142,50 @@
 	color: #fff;
 	font-size: 48px;
 	vertical-align: middle;
+	margin-top: 100px;
 }
 
+.header-nav {
+	position: fixed;
+	left: 0;
+	top: 0;
+	right: 0;
+	height: 30px;
+}
+
+.tri-col {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	top: 30px;
+}
+
+.list-column {
+	height: 100%;
+}
+
+.album-list-container {
+	overflow-y: scroll;
+	bottom: 0px;
+	top: 130px;
+	position: fixed;
+	width: 40%;
+}
+
+.col-head {
+	width: 100%;
+}
+
+.picks-column {
+	-left: 20px;
+}
+
+.label {
+	text-align: right;
+	padding-right: 10px;
+}
+
+.player-column {
+	top: 40px;
+}

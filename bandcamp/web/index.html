@@ -16,14 +16,14 @@
 			<div id="overlay_message" class="message"></div>
 		</div>
 		<div class="container">
-			<div class="row">
+			<div class="row header-nav">
 				<div class="col-xs-1">
 					<label for="user_picker">
 						User:
 					</label>
 				</div>
 				<div class="col-xs-3">
-					<select id="user_picker">
+					<select id="user_picker" class="form-control">
 					</select>
 				</div>
 				<div class="col-xs-3">
@@ -31,24 +31,38 @@
 				</div>
 			</div>
 			
-			<div class="row">
-				<div class="col-xs-4 col-sm-3 col-md-2 affix">
+			<div class="row tri-col">
+				
+				<div class="col-xs-4 col-sm-3 col-md-2 affix player-column">
 					 <div id="focus_release"></div>
 				</div>
 				<div class="col-xs-4 col-sm-3 col-md-2">
 				</div>
-				<div class="col-xs-4 col-md-5">
-					<h2>All 2016 Records</h2>
-					<div class="filters">
-						<label for="show_purchases" title="Show purchases"><input type="checkbox" id="show_purchases" checked="checked"> P</label>
-						<label for="show_wishlist" title="Show whishlist"><input type="checkbox" id="show_wishlist" checked="checked"> W</label>
+				
+				<div class="col-xs-4 col-md-5 list-column all-column">
+					<div class="col-head">
+						<h2>All 2016 Records</h2>
+						<div class="filters">
+							<div class="btn-group" data-toggle="buttons">
+								<label for="show_purchases" title="Show purchases" class="btn btn-md btn-success active"><input type="checkbox" id="show_purchases" checked="checked" autocomplete="off"> Purchases</label>
+								<label for="show_wishlist" title="Show whishlist" class="btn btn-md btn-info active"><input type="checkbox" id="show_wishlist" checked="checked" autocomplete="off"> Wishlist</label>
+							</div>
+						</div>
 					</div>
-					<ul class="album-list" id="all_releases"></ul>
+					<div class="album-list-container all-container">
+						<ul class="album-list all-releases-list" id="all_releases"></ul>
+					</div>
 				</div>
-				<div class="col-xs-4 col-md-5">
-					<h2>2016 Picks</h2>
-					<ol class="album-list" id="aoty_picks"></ol>
+				
+				<div class="col-xs-4 col-md-5 list-column picks-column">
+					<div class="col-head">
+						<h2>User's 2016 Picks</h2>
+					</div>
+					<div class="album-list-container picks-container">
+						<ol class="album-list aoty-picks-list" id="aoty_picks"></ol>
+					</div>
 				</div>
+				
 			</div>
 		</div><!-- .container -->
 		
@@ -74,23 +88,31 @@
 		</script>
 		
 		<script type="text/x-handlebars" id="album-entry">
-			<div class="user-{{list}}">
+			<span class="user-{{list}}">
+				{{!-- <img src="{{cover}}" class="cover thumb"> --}}
 				<span class="artist">{{band_name}}</span> - <span class="album">{{item_title}}</span>
-				<div class="add-arrow arrow btn btn-xs btn-primary"><span class="glyphicon glyphicon-plus"></span> <span class="hidden-md-down">Add</span></div>
-			</div>
+				<div class="actions">
+					<div class="listen-button arrow btn btn-sm btn-primary"><span class="glyphicon glyphicon-play-circle"></span> <span class="hidden-md-down">Listen</span></div>
+					<div class="add-arrow arrow btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span> <span class="hidden-md-down">Add</span></div>
+				</div>
+			</span>
 		</script>
 		
 		<script type="text/x-handlebars" id="pick-entry">
-			<div class="user-{{list}}">
+			<span class="user-{{list}}">
 				<span class="handle glyphicon glyphicon-menu-hamburger"></span>
 				<span class="artist">{{band_name}}</span> - <span class="album">{{item_title}}</span>
-				<div class="remove-arrow arrow btn btn-xs btn-danger"><span class="glyphicon glyphicon-remove"></span> <span class="hidden-md-down">Remove</span></div>
-			</div>
+				<div class="actions">
+					<div class="listen-button arrow btn btn-sm btn-primary"><span class="glyphicon glyphicon-play-circle"></span> <span class="hidden-md-down">Listen</span></div>
+					<div class="remove-arrow arrow btn btn-sm btn-danger"><span class="glyphicon glyphicon-remove"></span> <span class="hidden-md-down">Remove</span></div>
+				</div>
+			</span>
 		</script>
 		
 		<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 		<script src="js/jquery-ui.min.js"></script>
+		<script src="js/jquery.ui.touch-punch.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js" integrity="sha256-lsnwFhrNhbBmHfkBv9qFeiUVHti2+DmL0F1K5pysQsM=" crossorigin="anonymous"></script>
 		<script src="http://sirest.bhffc.com/js/class.js"></script>
 		<script src="http://sirest.bhffc.com/js/sjcl.js"></script>
