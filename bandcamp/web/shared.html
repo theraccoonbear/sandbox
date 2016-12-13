@@ -1,0 +1,96 @@
+<html>
+	<head>
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+		<link rel="stylesheet" href="css/jquery-ui.min.css">
+		<link rel="stylesheet" href="css/styles.css">
+		<title>
+			AOTY
+		</title>
+	</head>
+	<body>
+		<div id="modal_overlay" class="modal-overlay">
+			<div id="overlay_message" class="message"></div>
+		</div>
+		<div class="container">
+			<div class="row header-nav">
+				<div class="col-xs-1">
+					<label for="user_picker">
+						User:
+					</label>
+				</div>
+				<div class="col-xs-3">
+					<select id="user_picker" class="form-control">
+					</select>
+				</div>
+				<div class="col-xs-3">
+					<a href="docs/2016-bandcamp-albums.txt" target="_blank">Full User Collection Lists and Album Popularity</a>
+				</div>
+			</div>
+			
+			<div class="row tri-col">
+				<div class="col-md-2">
+					<div id="focus_release"></div>
+				</div>
+				<div class="col-md-10">
+					<div class="col-head" id="listHeader">
+					</div>
+					<div class="picked-album-list-container">
+						<ol class="album-list aoty-picks-list" id="aoty_picks"></ol>
+					</div>
+				</div>
+			</div>
+		</div><!-- .container -->
+		
+		<script type="text/x-handlebars" id="user-list-header">
+			<h2><a href="http://www.bandcamp.com/{{user}}">{{user}}'s 2016 Picks</a></h2>
+		</script>
+		
+		<script type="text/x-handlebars" id="album-display">
+			{{#if id}}
+			<iframe style="border: 0; width: 100%; height: 100%;" src="https://bandcamp.com/EmbeddedPlayer/album={{id}}/size=large/bgcol=ffffff/linkcol=0687f5/transparent=true/" seamless><a href="{{item_url}}">{{item_title}} by {{band_name}}</a></iframe>
+			{{else}}
+			<h2><em>{{item_title}}</em> <span class="hidden-sm-up"><br></span><strong>{{band_name}}</strong></h2>
+			<div class="album">
+				<div class="cover">
+					<img src="{{cover}}">
+				</div>
+				<ul class="details">
+					<li class="bandcamp"><a href="{{item_url}}" target="_blank">Bandcamp</a></li>
+				</ul>
+				<ol class="track-list">
+					{{#each tracks}}
+						<li>{{name}}</li>
+					{{/each}}
+				</ol>
+			</div>
+			{{/if}}
+		</script>
+		
+		<script type="text/x-handlebars" id="pick-entry">
+			<span class="user-{{list}}">
+				<div class="cover-thumb">
+					<img src="{{cover}}">
+				</div>
+				<div class="release-info">
+					<span class="artist">{{band_name}}</span> - <span class="album">{{item_title}}</span>
+					<div class="actions">
+						<div class="listen-button arrow btn btn-sm btn-primary"><span class="glyphicon glyphicon-play-circle"></span> <span class="hidden-md-down">Listen</span></div>
+					</div><br>
+					<a href="{{item_url}}" target="_blank">View on Bandcamp</a>
+				</div>
+			</span>
+		</script>
+		
+		<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js" integrity="sha256-lsnwFhrNhbBmHfkBv9qFeiUVHti2+DmL0F1K5pysQsM=" crossorigin="anonymous"></script>
+		<script src="http://sirest.bhffc.com/js/class.js"></script>
+		<script src="http://sirest.bhffc.com/js/sjcl.js"></script>
+		<script src="http://sirest.bhffc.com/sirest.js"></script>
+		<script src="js/shared.js"></script>
+	</body>
+</html>

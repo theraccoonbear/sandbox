@@ -173,6 +173,38 @@ body {
 	width: 40%;
 }
 
+.picked-album-list-container {
+	overflow-y: scroll;
+	bottom: 0px;
+	top: 75px;
+	position: fixed;
+	width: 83%;
+}
+
+.picked-album-list-container li {
+	height: 100px;
+}
+
+.picked-album-list-container li a:hover {
+	color: #fff;
+}
+
+.cover-thumb {
+	float: left;
+	display: inline-block;
+	padding: 2px;
+}
+
+.cover-thumb img {
+	width: 60px;
+	height: 60px;
+	border: 1px solid #fff;
+}
+
+.release-info {
+	margin-left: 20px;
+}
+
 .col-head {
 	width: 100%;
 }
