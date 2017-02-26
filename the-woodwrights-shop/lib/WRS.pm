@@ -10,6 +10,8 @@ use URI::Escape;
 use Text::Unidecode;
 use JSON::XS;
 use POSIX;
+use TVDB::API;
+
 
 #http://www.pbs.org/woodwrightsshop/watch-on-line/watch-season-episodes/2015-2016-episodes/
 	
@@ -28,9 +30,70 @@ has 'mech' => (
 	}
 );
 
+has 'tvdb_api_key' => (
+	is => 'rw',
+	isa => 'Maybe[Str]'
+);
+
+has 'tvdb' => (
+	is => 'rw',
+	isa => 'Maybe[TVDB::API]'
+);
+
+#has 'series' => (
+#	is => 'rw',
+#	isa => 'Maybe[WebService::TVDB::Series]'
+#);
+
+has 'series_id' => (
+	is => 'rw',
+	isa => 'Int',
+	default => 93871
+);
+
+
+
 my $season_episode_scraper = scraper {
 	process '[data-video-id]', 'ids[]' => '@data-video-id', 'titles[]' => sub { return $_->as_trimmed_text(); };
+	process '.video-list .video-list-item a', 'extras[]' => sub {
+		my $onclick = $_->attr('onclick');
+		my $id = '0';
+		my $title = 'NO TITLE';
+		if ($onclick =~ m/loadVideo\(['"]?(?<id>\d+)['"]?\s*,\s*["'](?<title>.+?)["']/) {
+			$id = $+{id};
+			$title = trim($+{title});
+		}
+		
+		return {
+			id => 1 * $id,
+			title => $title
+		};
+	}
 };
+
+sub BUILD {
+	my ($self) = @_;
+	
+	if ($self->tvdb_api_key) {
+		$self->tvdb(new TVDB::API());
+		
+		$self->tvdb->setApiKey($self->tvdb_api_key);
+		$self->tvdb->setLang('en');
+		
+		p($self->tvdb->getConf);
+	}
+}
+
+sub tvdbListEpisodes {
+	my ($self) = @_;
+	
+	my $series= $self->tvdb->getSeries('The Woodwright\'s Shop');
+	p($series);
+	die;
+	
+	$self->series->fetch();
+	p($self->series->episodes);
+}
 
 sub listEpisodesForSeason {
 	my ($self, $start, $end) = @_;
@@ -45,9 +108,18 @@ sub listEpisodesForSeason {
 		my $idx = 0;
 		foreach my $id (@{$res->{ids}}) {
 			my $title = $res->{titles}->[$idx++];
-			push @$eps, {title => $title, id => $id};
+			push @$eps, {title => $title, id => 1 * $id};
+		}
+		
+		$idx = 0;
+		foreach my $ep (@{$res->{extras}}) {
+			#my $title = $res->{titles}->[$idx++];
+			push @$eps, $ep;
 		}
 	}
+	
+	$eps = [sort { $a->{id} <=> $b->{id} } @$eps];
+	
 	return $eps;
 }
 
@@ -62,6 +134,12 @@ sub doGet {
 sub logMsg {
 	my ($self, $msg) =  @_;
 	print STDERR $msg;
+}
+
+sub trim {
+	my ($txt) = @_;
+	$txt =~ s/^\s*(.+?)\s*$/$1/;
+	return $txt;
 }
 
 sub grabEpisode {
