@@ -17,6 +17,9 @@ foreach my $ep (@$episodes) {
 	$ep_num++;
 	$ep->{title} = unidecode($ep->{title});
 	my $file = sprintf('./data/The Woodwright\'s Ships - s%02de%02d - %s.mp4', $season_num, $ep_num, $ep->{title});
-	print STDERR "Grabbing $file...\n";
-	$wrs->grabEpisode($ep->{id}, $file);
+	
+	if ($ep_num =~ m/^[6789]$/) {
+		print STDERR "Grabbing $file...\n";
+		$wrs->grabEpisode($ep->{id}, $file);
+	}
 }
