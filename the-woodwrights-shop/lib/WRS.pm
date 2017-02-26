@@ -1,3 +1,5 @@
+package WRS;
+
 use Moose;
 use Data::Printer;
 use WWW::Mechanize;
