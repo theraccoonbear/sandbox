@@ -10,7 +10,7 @@ use Web::Scraper;
 
 binmode STDOUT, ":utf8";
 
-my $iron_chef_root = '/storage/media1/tv/Iron Chef/';
+my $iron_chef_root = '/storage/media1/tv/Iron Chef';
  
 my $cache = CHI->new(
     driver   => 'File',
@@ -78,6 +78,8 @@ foreach my $season (@$results) {
 	my $new_episodes = [];	
 	foreach my $episode (@{ $season->{episodes}}) {
 		if ($episode->{url}) {
+			my $episode_path = sprintf('%s/Season %d/*s%d%02d', $iron_chef_root, $s_num, $episode->{number});
+			$episode->{path} = $episode_path;
 			push @$new_episodes, $episode;
 		}
 	}
