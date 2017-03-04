@@ -98,11 +98,9 @@ foreach my $season (@$results) {
 	my $new_episodes = [];	
 	foreach my $episode (@{ $season->{episodes}}) {
 		if ($episode->{url}) {
-			my $episode_path = sprintf('%s/Season %d/*s%de%02d', $iron_chef_root, $s_num, $s_num, $episode->{number});
-			$episode_path =~ s/\s/\\ /g;
-			$episode->{path} = $episode_path;
-			my $files = [grep { -e $_ } glob $episode_path];
-			$episode->{glob_match} = $files;
+			my $sek = $s_num . ':' . $episode->{number};
+			my $files = $iron_chef_files->{$sek} || [];
+			$episode->{files} = $files;
 			push @$new_episodes, $episode;
 		}
 	}
