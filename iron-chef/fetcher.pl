@@ -22,10 +22,10 @@ if (-d $iron_chef_root) {
 		map {
 			if ($_ =~ m/\bs(?<season>\d+)e(?<episode>\d+)\b/i) {
 				my $sek = $+{season} . ':' . $+{episode};
-				if (!$iron_chef_root->{$sek}) {
-					$iron_chef_root->{$sek} = [];
+				if (!$iron_chef_files->{$sek}) {
+					$iron_chef_files->{$sek} = [];
 				}
-				push @{ $iron_chef_root->{$sek} }, $_;
+				push @{ $iron_chef_files->{$sek} }, $_;
 			}
 		} readdir DFH;
 		closedir DFH;
