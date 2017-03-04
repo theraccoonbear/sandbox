@@ -10,7 +10,27 @@ use Web::Scraper;
 
 binmode STDOUT, ":utf8";
 
-my $iron_chef_root = '/storage/media1/tv/Iron Chef';
+my $iron_chef_root = '/storage/media1/tv/Iron Chef/';
+ 
+my $iron_chef_files = {};
+if (-d $iron_chef_root) {
+	opendir DFH, $iron_chef_root;
+	my $seasons = [ map { $iron_chef_root . $_ } grep { /Season\s+\d+/ } readdir DFH ];
+	closedir DFH;
+	foreach my $season (@$seasons) {
+		opendir DFH, $season;
+		map {
+			if ($_ =~ m/\bs(?<season>\d+)e(?<episode>\d+)\b/i) {
+				my $sek = $+{season} . ':' . $+{episode};
+				if (!$iron_chef_root->{$sek}) {
+					$iron_chef_root->{$sek} = [];
+				}
+				push @{ $iron_chef_root->{$sek} }, $_;
+			}
+		} readdir DFH;
+		closedir DFH;
+	}
+}
  
 my $cache = CHI->new(
     driver   => 'File',
@@ -90,7 +110,8 @@ foreach my $season (@$results) {
 	push @$new_seasons, $season;
 }
 
-p($results);
+#p($results);
 p($new_seasons);
+p($iron_chef_files);
 
 print STDERR "Cached? " . ($mech->is_cached ? 'YES' : 'NO') . "\n";
