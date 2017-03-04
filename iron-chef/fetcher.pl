@@ -79,6 +79,7 @@ foreach my $season (@$results) {
 	foreach my $episode (@{ $season->{episodes}}) {
 		if ($episode->{url}) {
 			my $episode_path = sprintf('%s/Season %d/*s%de%02d', $iron_chef_root, $s_num, $s_num, $episode->{number});
+			$episode_path =~ s/\s/\\ /g;
 			$episode->{path} = $episode_path;
 			my $files = [glob $episode_path];
 			$episode->{glob_match} = $files;
