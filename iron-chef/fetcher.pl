@@ -70,7 +70,7 @@ if (!$scraped) {
 	$cache->set($scraper_cache_key, $scraped);
 }
 
-my $results = [ grep { $_->{number} =~ m/^\d+$/ } @{ $scraped->{seasons} }];
+my $results = $scraped->{seasons}; #[ grep { $_->{number} =~ m/^\d+$/ } @{ $scraped->{seasons} }];
 
 my $new_seasons = [];
 foreach my $season (@$results) {
@@ -80,6 +80,8 @@ foreach my $season (@$results) {
 		if ($episode->{url}) {
 			my $episode_path = sprintf('%s/Season %d/*s%de%02d', $iron_chef_root, $s_num, $s_num, $episode->{number});
 			$episode->{path} = $episode_path;
+			my $files = [glob $episode_path];
+			$episode->{glob_match} = $files;
 			push @$new_episodes, $episode;
 		}
 	}
