@@ -99,9 +99,12 @@ foreach my $season (@$results) {
 	foreach my $episode (@{ $season->{episodes}}) {
 		if ($episode->{url}) {
 			my $sek = $s_num . ':' . $episode->{number};
-			my $files = $iron_chef_files->{$sek} || [];
+			my $files = $iron_chef_files->{$sek};
 			$episode->{files} = $files;
-			push @$new_episodes, $episode;
+			
+			if (! $episode->{files} ) {
+				push @$new_episodes, $episode;
+			}
 		}
 	}
 	$season->{episodes} = $new_episodes;
@@ -110,6 +113,6 @@ foreach my $season (@$results) {
 
 #p($results);
 p($new_seasons);
-p($iron_chef_files);
+#p($iron_chef_files);
 
 print STDERR "Cached? " . ($mech->is_cached ? 'YES' : 'NO') . "\n";
