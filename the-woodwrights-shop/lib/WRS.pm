@@ -133,7 +133,11 @@ sub doGet {
 
 sub logMsg {
 	my ($self, $msg) =  @_;
-	print STDERR $msg;
+	if (! ref $msg || ref $msg eq 'SCALAR') {
+		print STDERR $msg;
+	} else {
+		p($msg);
+	}
 }
 
 sub trim {
@@ -199,8 +203,13 @@ sub getEpisodeChunkList {
 									my $uri = $data->{url};
 									$self->doGet($uri);
 									if ($self->mech->success) {
-										if ($self->mech->content =~ m/URI="(?<uri>[^"]+?2500k[^"]+)"/gism) {
-											$url = $+{uri};
+										if ($self->mech->content =~ m/URI="(?<uri>[^"]+?\d+k[^"]+)"/gism ||
+												$self->mech->content=~ m/^(?<alturi>[^#].+\.m3u8)$/gim) {
+											if ($+{url}) {
+												$url = $+{uri};
+											} else {
+												$url = $+{alturi};
+											}
 											$uri =~ s/\/[^\/]+$/\//;
 											my $base_uri = $uri;
 											$uri = $base_uri . $url;
@@ -220,6 +229,7 @@ sub getEpisodeChunkList {
 												die "Couldn't fetch IFRAME index file";
 											}
 										} else {
+											$self->logMsg($self->mech->content);
 											die "Can't find IFRAME index URI";
 										}
 									} else {
