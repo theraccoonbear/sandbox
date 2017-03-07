@@ -16,7 +16,7 @@ if (-f 'config.json') {
 
 my $wrs = new WRS($config);
 
-my $init_year = 2016;
+my $init_year = 2009;
 my $episodes = $wrs->listEpisodesForSeason($init_year, $init_year + 1);
 
 
@@ -27,8 +27,6 @@ foreach my $ep (@$episodes) {
 	$ep->{title} = unidecode($ep->{title});
 	my $file = sprintf('./data/The Woodwright\'s Ships - s%02de%02d - %s.mp4', $season_num, $ep_num, $ep->{title});
 	
-	if ($ep_num > 9) {
-		print STDERR "Grabbing $file...\n";
-		$wrs->grabEpisode($ep->{id}, $file);
-	}
+	print STDERR "Grabbing $file...\n";
+	$wrs->grabEpisode($ep->{id}, $file);
 }

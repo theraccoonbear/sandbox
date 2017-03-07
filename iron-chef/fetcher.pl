@@ -100,9 +100,9 @@ foreach my $season (@$results) {
 		if ($episode->{url}) {
 			my $sek = $s_num . ':' . $episode->{number};
 			my $files = $iron_chef_files->{$sek};
-			$episode->{files} = $files;
+			#$episode->{files} = $files;
 			
-			if (! $episode->{files} ) {
+			if (!$files) {
 				push @$new_episodes, $episode;
 			}
 		}
