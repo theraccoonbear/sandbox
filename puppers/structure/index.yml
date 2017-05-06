@@ -1,0 +1,36 @@
+---
+app:
+  name: sandbox-app
+  identity:
+    methods:
+      - cookie
+      - jwt
+  api:
+    attachment: /api
+    
+  entities:
+    user:
+      provides:
+        - identity
+      fields:
+        username: string
+        password: string
+        email: string
+        age: number
+        created: date
+        modified: date
+  
+    message:
+      fields:
+        sender:
+          type: user.id
+          can: read
+          value: identity.user.id
+        recipient: 
+          type: user/id
+          can: read
+        subject: string
+        reply_to: message.id?
+        body: string
+        created: date
+        modified: date

@@ -78,14 +78,11 @@ foreach my $user (@$users) {
     if ($_->released) {
       if ($_->released->year eq $search_year) {
         print STDERR '+';
-        1;
-      } else {
-        print STDERR '-';
-        undef;
+        return 1;
       }
-    } else {
-      undef;
     }
+		print STDERR '-';
+    return undef;
   } @{ $collection->{collection} }];
   print STDERR "\n";
   
@@ -99,13 +96,10 @@ foreach my $user (@$users) {
       if ($_->released->year eq $search_year) {
         print STDERR '+';
         1;
-      } else {
-        print STDERR '-';
-        undef;
       }
-    } else {
-      undef;
     }
+		print STDERR '-';
+    undef;
   } @{ $collection->{wishlist} }];
   
   print STDERR "\n";

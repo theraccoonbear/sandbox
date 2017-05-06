@@ -74,14 +74,20 @@ my $season_episode_scraper = scraper {
 sub BUILD {
 	my ($self) = @_;
 	
+	
 	if ($self->tvdb_api_key) {
-		$self->tvdb(new TVDB::API());
-		
+		#p($self->tvdb_api_key);
+		#die;
+		$self->tvdb(new TVDB::API($self->tvdb_api_key, 'en', undef, undef, ['http://thetvdb.com']));
 		$self->tvdb->setApiKey($self->tvdb_api_key);
 		$self->tvdb->setLang('en');
 		
 		p($self->tvdb->getConf);
+	} else {
+		p($self->tvdb_api_key);
 	}
+	
+	die;
 }
 
 sub tvdbListEpisodes {
