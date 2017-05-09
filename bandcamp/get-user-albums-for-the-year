@@ -58,6 +58,7 @@ GetOptions (
 	"year=i" => \$search_year
 );
 
+print STDERR "Looking for albums released in $search_year\n";
 
 my $user_data_index = [];
 
@@ -65,7 +66,7 @@ my $ts = time();
 
 my $users = $config->{users_to_list};
 foreach my $user (@$users) {
-  my $bc = new BC::UserProfile(user => $user);
+  my $bc = new BC::UserProfile(user => $user, debug => 1);
   print STDERR "Loading ${user}'s collection...\n";
   my $collection = $bc->pullCollection();
 
@@ -78,11 +79,15 @@ foreach my $user (@$users) {
     if ($_->released) {
       if ($_->released->year eq $search_year) {
         print STDERR '+';
-        return 1;
-      }
-    }
-		print STDERR '-';
-    return undef;
+        1;
+      } else {
+				print STDERR '-';
+				undef;
+			}
+    } else {
+			print STDERR '-';
+			undef;
+		}
   } @{ $collection->{collection} }];
   print STDERR "\n";
   
@@ -96,10 +101,14 @@ foreach my $user (@$users) {
       if ($_->released->year eq $search_year) {
         print STDERR '+';
         1;
-      }
-    }
-		print STDERR '-';
-    undef;
+      } else {
+				print STDERR '-';
+				undef;
+			}
+    } else {
+			print STDERR '-';
+			undef;
+		}
   } @{ $collection->{wishlist} }];
   
   print STDERR "\n";
