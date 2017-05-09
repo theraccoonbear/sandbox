@@ -38,7 +38,7 @@ Controller.prototype.getCurrentList = function() {
 };
 
 Controller.prototype.userListKey = function(username) {
-	return `user-${username}-2016-list`;
+	return `user-${username}-2017-list`;
 };
 
 Controller.prototype.getListForUser = function(username, cb) {
@@ -213,7 +213,7 @@ Controller.prototype.displayUserAlbums = function(username) {
 		
 		var albums = ctxt._users[username];
 		$.each(albums, function(idx, release) {
-			if (/^2016-/.test(release.released)) {
+			if (/^2017-/.test(release.released)) {
 				ctxt.addReleaseToAllList(release);
 			}
 		});
