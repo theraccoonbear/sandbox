@@ -52,10 +52,6 @@ foreach my $sheet (@{$excel -> {Worksheet}}) {
 	}
 }
 
-# Bayesian Rating = 
-# 	(Average Number of Votes across all videos * Average Rating of all videos) + (Total People Who Rated * Video’s Total Rating) / 
-#   (Average Number of Votes across all videos + Total People Who Rated)
-
 my $total_votes_cast = 0;
 my $total_ratings = 0;
 
@@ -67,33 +63,26 @@ foreach my $slug (keys %{ $scores }) {
 	$scores->{$slug}->{average_rating} = $scores->{$slug}->{total_score_for_item} / $scores->{$slug}->{votes_for_item};
 }
 
-#my $total_average_rating = $total_ratings / $total_votes_cast;
 my $total_average_rating = sum(map { $scores->{$_}->{average_rating} } keys %{ $scores }) / scalar keys %{ $scores };
 my $average_number_votes_total = $total_votes_cast / scalar keys %{ $scores };
 
 foreach my $slug (keys %{ $scores }) {
-	#my $videos_total_rating = sum(@{ $scores->{$slug}->{sources} });
-	#my $weighted = (($average_number_votes_total * $total_average_rating) + ($users_who_rated * $videos_total_rating)) / ($average_number_votes_total + $users_who_rated);
-	# $average_number_votes_total: The average number of votes of all items that have num_votes>0
-	# $total_average_rating: The average rating of each item (again, of those that have num_votes>0)
-	# $this_num_votes: number of votes for this item
-	# $total_score_for_item: the rating of this item
-
-	# my $this_num_votes = scalar @{ $scores->{$slug}->{sources} };
-	# my $total_score_for_item = sum(@{ $scores->{$slug}->{sources} });
-
 	my $item = $scores->{$slug};
-
-	$scores->{$slug}->{br} = (($average_number_votes_total * $total_average_rating) + ($item->{votes_for_item} * $item->{total_score_for_item}) ) / ($average_number_votes_total + $item->{votes_for_item});
-	#$scores->{$slug}->{bayesian_weighted_score} = $weighted;
+	$scores->{$slug}->{bayesian_weighted_rank} = (($average_number_votes_total * $total_average_rating) + ($item->{votes_for_item} * $item->{total_score_for_item}) ) / ($average_number_votes_total + $item->{votes_for_item});
 }
-
 
 my $count = 0;
 
 #my $sort_by = 'points';
-#my $sort_by = 'bayesian_weighted_score';
-my $sort_by = 'br';
+my $sort_by = 'bayesian_weighted_rank';
+
+say <<'__STUFF';
+	Total Votes Cast: $total_votes_cast
+	Total Ratings: $total_ratings
+	Avg Rating Total: $total_average_rating
+	Avg Votes Total: $average_number_votes_total
+	Users Who Voted: $users_who_rated
+__STUFF
 
 say "Sorting by '$sort_by'";
 
@@ -103,15 +92,5 @@ foreach my $slug (sort {
 	my $rel = $scores->{$slug};
 	$rel->{average} = $rel->{points} / scalar @{ $rel->{sources} };
 	$count++;
-	#printf '%2s) %s - %s (%s points; %.02f adjusted)', $count, $rel->{artist}, $rel->{album}, $rel->{points}, $rel->{average};
-	printf '%2s. *%s* - _%s_ %.01f/10 (%s votes; %.01f)', $count, $rel->{artist}, $rel->{album}, $rel->{average_rating}, $rel->{votes_for_item}, $rel->{$sort_by};
-	print "\n";
+	say sprintf '%2s. *%s* - _%s_ %.01f/10 (%s votes; %.01f)', $count, $rel->{artist}, $rel->{album}, $rel->{average_rating}, $rel->{votes_for_item}, $rel->{$sort_by};
 }
-
-print <<__STUFF;
-	Total Votes Cast: $total_votes_cast
-	Total Ratings: $total_ratings
-	Avg Rating Total: $total_average_rating
-	Avg Votes Total: $average_number_votes_total
-	Users Who Voted: $users_who_rated
-__STUFF
