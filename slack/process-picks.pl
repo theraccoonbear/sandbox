@@ -9,6 +9,7 @@ our $VERSION = 0.1;
 use Spreadsheet::XLSX;
 use List::Util qw(min max sum);
 use Data::Printer;
+use Getopt::Long;
 
 sub makeSlug {
 	my ($art, $alb) = @_;
@@ -20,15 +21,45 @@ sub makeSlug {
 	return "$art-$alb";
 }
 
+sub showUsage {
+  my ($msg) = @_;
+
+  print STDERR <<__USAGE;
+EOY List Picks Processor
+
+./process-picks.pl --source <source.xlsx>
+__USAGE
+
+  if ($msg) {
+    say STDERR $msg;
+  }
+}
+
+my $source;
+GetOptions ("source=s" => \$source) or die("Error in command line arguments\n");
+
+if (!$source || ! -f $source) {
+  showUsage('Cannot find source or none specified');
+  exit 1;
+}
+
 
 
 my $MAX_RECORDS = 10;
 my $scores = {};
 
-my $excel = Spreadsheet::XLSX -> new ('2017-slacker-picks.xlsx');
+my $excel = Spreadsheet::XLSX->new($source);
+my $user_data = {};
 my $users_who_rated = 0;
 foreach my $sheet (@{$excel -> {Worksheet}}) {
 	$sheet -> {MaxRow} ||= $sheet -> {MinRow};
+	my $username = $sheet->{Name};
+	my $user = {
+		raw => $sheet,
+		by_slug => {}
+	};
+	$user_data->{$username} = $user;
+	#die;
 	$users_who_rated++;
 	foreach my $row (0..$MAX_RECORDS - 1) {
 		my $rank = $sheet->{Cells}[$row][0]->{Val};
@@ -38,6 +69,7 @@ foreach my $sheet (@{$excel -> {Worksheet}}) {
 		if ($rank && $artist && $album) {
 			my $slug = makeSlug($artist, $album);
 			my $score = ($MAX_RECORDS - $rank) + 1;
+			$user->{by_slug}->{$slug} = $score;
 			if (!$scores->{$slug}) {
 				$scores->{$slug} = {
 					points => 0,
@@ -76,7 +108,7 @@ my $count = 0;
 #my $sort_by = 'points';
 my $sort_by = 'bayesian_weighted_rank';
 
-say <<'__STUFF';
+say <<"__STUFF";
 	Total Votes Cast: $total_votes_cast
 	Total Ratings: $total_ratings
 	Avg Rating Total: $total_average_rating
@@ -84,7 +116,7 @@ say <<'__STUFF';
 	Users Who Voted: $users_who_rated
 __STUFF
 
-say "Sorting by '$sort_by'";
+# say "Sorting by '$sort_by'";
 
 foreach my $slug (sort { 
 	$scores->{$b}->{$sort_by} <=> $scores->{$a}->{$sort_by}
