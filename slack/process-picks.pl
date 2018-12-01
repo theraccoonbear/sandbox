@@ -54,34 +54,35 @@ my $users_who_rated = 0;
 foreach my $sheet (@{$excel -> {Worksheet}}) {
 	$sheet -> {MaxRow} ||= $sheet -> {MinRow};
 	my $username = $sheet->{Name};
-	my $user = {
-		raw => $sheet,
-		by_slug => {}
-	};
-	$user_data->{$username} = $user;
-	#die;
-	$users_who_rated++;
-	foreach my $row (0..$MAX_RECORDS - 1) {
-		my $rank = $sheet->{Cells}[$row][0]->{Val};
-		my $artist = $sheet->{Cells}[$row][1]->{Val};
-		my $album = $sheet->{Cells}[$row][2]->{Val};
-		
-		if ($rank && $artist && $album) {
-			my $slug = makeSlug($artist, $album);
-			my $score = ($MAX_RECORDS - $rank) + 1;
-			$user->{by_slug}->{$slug} = $score;
-			if (!$scores->{$slug}) {
-				$scores->{$slug} = {
-					points => 0,
-					sources => [],
-					artist => $artist,
-					album => $album
-				};
-			}
-			$scores->{$slug}->{points} += $score;
-			push @{ $scores->{$slug}->{sources} }, $score;
-		}
-	}
+  if ($username !~ /^_/) {
+    my $user = {
+      raw => $sheet,
+      by_slug => {}
+    };
+    $user_data->{$username} = $user;
+    $users_who_rated++;
+    foreach my $row (0..$MAX_RECORDS - 1) {
+      my $rank = $sheet->{Cells}[$row][0]->{Val};
+      my $artist = $sheet->{Cells}[$row][1]->{Val};
+      my $album = $sheet->{Cells}[$row][2]->{Val};
+      
+      if ($rank && $artist && $album) {
+        my $slug = makeSlug($artist, $album);
+        my $score = ($MAX_RECORDS - $rank) + 1;
+        $user->{by_slug}->{$slug} = $score;
+        if (!$scores->{$slug}) {
+          $scores->{$slug} = {
+            points => 0,
+            sources => [],
+            artist => $artist,
+            album => $album
+          };
+        }
+        $scores->{$slug}->{points} += $score;
+        push @{ $scores->{$slug}->{sources} }, $score;
+      }
+    }
+  }
 }
 
 my $total_votes_cast = 0;
@@ -109,11 +110,11 @@ my $count = 0;
 my $sort_by = 'bayesian_weighted_rank';
 
 say <<"__STUFF";
-	Total Votes Cast: $total_votes_cast
-	Total Ratings: $total_ratings
-	Avg Rating Total: $total_average_rating
-	Avg Votes Total: $average_number_votes_total
-	Users Who Voted: $users_who_rated
+	*Total Votes Cast:* $total_votes_cast
+	*Total Ratings:* $total_ratings
+	*Avg Rating Total:* $total_average_rating
+	*Avg Votes Total:* $average_number_votes_total
+	*Users Who Voted:* $users_who_rated
 __STUFF
 
 # say "Sorting by '$sort_by'";
