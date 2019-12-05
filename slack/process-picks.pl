@@ -66,7 +66,7 @@ foreach my $sheet (@{ $excel->{Worksheet} }) {
     };
     $user_data->{$username} = $user;
     $users_who_rated++;
-    foreach my $row ($skip..$MAX_RECORDS - 1) {
+    foreach my $row ($skip..$MAX_RECORDS + $skip- 1) {
       my $rank = $sheet->{Cells}[$row][0]->{Val};
       my $artist = $sheet->{Cells}[$row][1]->{Val};
       my $album = $sheet->{Cells}[$row][2]->{Val};
