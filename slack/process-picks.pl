@@ -6,7 +6,9 @@ use v5.10;
 
 our $VERSION = 0.1;
 
+use utf8;
 use Spreadsheet::XLSX;
+use Text::Unidecode;
 use List::Util qw(min max sum);
 use Data::Printer;
 use Getopt::Long;
@@ -14,9 +16,9 @@ use Getopt::Long;
 sub makeSlug {
 	my ($art, $alb) = @_;
 
-	$art = lc($art);
+	$art = unidecode(lc($art));
 	$art =~ s/[^a-z0-9]+/_/gxsm;
-	$alb = lc($alb);
+	$alb = unidecode(lc($alb));
 	$alb =~ s/[^a-z0-9]+/_/gxsm;
 	return "$art-$alb";
 }
@@ -44,15 +46,14 @@ if (!$source || ! -f $source) {
 }
 
 
-
 my $MAX_RECORDS = 10;
 my $scores = {};
 
 my $excel = Spreadsheet::XLSX->new($source);
 my $user_data = {};
 my $users_who_rated = 0;
-foreach my $sheet (@{$excel -> {Worksheet}}) {
-	$sheet -> {MaxRow} ||= $sheet -> {MinRow};
+foreach my $sheet (@{ $excel->{Worksheet} }) {
+	$sheet->{MaxRow} ||= $sheet->{MinRow};
 	my $username = $sheet->{Name};
   if ($username !~ /^_/) {
     my $user = {
