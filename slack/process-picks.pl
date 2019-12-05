@@ -38,7 +38,11 @@ __USAGE
 }
 
 my $source;
-GetOptions ("source=s" => \$source) or die("Error in command line arguments\n");
+my $skip = 0; # rows to skip
+GetOptions (
+  "source=s" => \$source,
+  "skip=i" => \$skip
+) or die("Error in command line arguments\n");
 
 if (!$source || ! -f $source) {
   showUsage('Cannot find source or none specified');
@@ -62,7 +66,7 @@ foreach my $sheet (@{ $excel->{Worksheet} }) {
     };
     $user_data->{$username} = $user;
     $users_who_rated++;
-    foreach my $row (0..$MAX_RECORDS - 1) {
+    foreach my $row ($skip..$MAX_RECORDS - 1) {
       my $rank = $sheet->{Cells}[$row][0]->{Val};
       my $artist = $sheet->{Cells}[$row][1]->{Val};
       my $album = $sheet->{Cells}[$row][2]->{Val};
@@ -110,12 +114,15 @@ my $count = 0;
 #my $sort_by = 'points';
 my $sort_by = 'bayesian_weighted_rank';
 
+my $usernames = join(", ", map { '@' . $_ } keys %{$user_data});
+
 say <<"__STUFF";
   *Total Votes Cast:* $total_votes_cast
   *Total Ratings:* $total_ratings
   *Avg Rating Total:* $total_average_rating
   *Avg Votes Total:* $average_number_votes_total
   *Users Who Voted:* $users_who_rated
+  *Voting Users:* $usernames
 __STUFF
 
 # say "Sorting by '$sort_by'";
