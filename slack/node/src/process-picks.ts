@@ -138,13 +138,12 @@ async function main() {
   allScores
     .sort((a, b) => {
       if (a[sortBy] < b[sortBy]) {
-        return -1;
-      } else if (a[sortBy] > b[sortBy]) {
         return 1;
+      } else if (a[sortBy] > b[sortBy]) {
+        return -1;
       }
       return 0;
-    })
-    .reverse();
+    });
 
   console.log(`)
 *Total Votes Cast:* ${total_votes_cast}
