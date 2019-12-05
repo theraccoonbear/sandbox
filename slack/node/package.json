@@ -1,0 +1,25 @@
+{
+  "name": "slack-pick-ranker",
+  "version": "1.0.0",
+  "description": "Ranks EOY Slack metal picks with Bayesian weighting",
+  "main": "index.js",
+  "author": "Don",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "start": "node dist/process-picks.js"
+  },
+  "dependencies": {
+    "@types/node": "^12.12.14",
+    "@types/node-fetch": "^2.5.4",
+    "@types/sprintf-js": "^1.1.2",
+    "@types/xlsx": "^0.0.36",
+    "@types/yargs": "^13.0.3",
+    "node-fetch": "^2.6.0",
+    "sprintf-js": "^1.1.2",
+    "unidecode": "^0.1.8",
+    "xlsx": "^0.15.3",
+    "yargs": "^15.0.2"
+  }
+}
