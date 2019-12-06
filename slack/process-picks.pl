@@ -94,19 +94,27 @@ my $total_votes_cast = 0;
 my $total_ratings = 0;
 
 foreach my $slug (keys %{ $scores }) {
+  # count votes for release
   $scores->{$slug}->{votes_for_item} = scalar @{ $scores->{$slug}->{sources} };
+  # sum votes for release
   $scores->{$slug}->{total_score_for_item} = sum(@{ $scores->{$slug}->{sources} });
+  # running total of votes
   $total_votes_cast += $scores->{$slug}->{votes_for_item};
+  # running total of sums
   $total_ratings += $scores->{$slug}->{total_score_for_item};
+  # average (mean) rating for release
   $scores->{$slug}->{average_rating} = $scores->{$slug}->{total_score_for_item} / $scores->{$slug}->{votes_for_item};
 }
 
+# sum average rating across releases and divide by total numer of distinct releases voted on
 my $total_average_rating = sum(map { $scores->{$_}->{average_rating} } keys %{ $scores }) / scalar keys %{ $scores };
 my $average_number_votes_total = $total_votes_cast / scalar keys %{ $scores };
 
 foreach my $slug (keys %{ $scores }) {
   my $item = $scores->{$slug};
-  $scores->{$slug}->{bayesian_weighted_rank} = (($average_number_votes_total * $total_average_rating) + ($item->{votes_for_item} * $item->{total_score_for_item}) ) / ($average_number_votes_total + $item->{votes_for_item});
+  $scores->{$slug}->{bayesian_weighted_rank} = 
+    ( ($average_number_votes_total * $total_average_rating) + ($item->{votes_for_item} * $item->{total_score_for_item}) ) /
+    ($average_number_votes_total + $item->{votes_for_item});
 }
 
 my $count = 0;
