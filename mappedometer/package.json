@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  },
+  "name": "mappedometer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+      "awspub": "zip -x function.zip -r function.zip . && aws lambda update-function-code --function-name get-route --zip-file fileb://function.zip && rm function.zip"
+  }
+}
