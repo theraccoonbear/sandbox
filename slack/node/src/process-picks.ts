@@ -18,12 +18,12 @@ const COLS = {
   URL: 'D',
 };
 
-function getCell(sheet, col, row): string | number | boolean {
+function getCell(sheet, col, row): string | boolean {
   const cell = sheet[`${col}${row}`];
   if (!cell) {
     return false;
   }
-  return cell.v;
+  return cell.v.toString().trim();
 }
 
 function makeSlug(thing: string): string {
@@ -113,7 +113,7 @@ async function main(): Promise<string> {
   Object.keys(scores).forEach(slug => {
     scores[slug].votesForItem = scores[slug].sources.length;
     scores[slug].totalScoreForItem = scores[slug].sources.reduce(
-      (p, c) => p + c,
+      (p: number, c: number) => p + c,
       0,
     );
     totalVotesCast += scores[slug].votesForItem;
@@ -125,7 +125,7 @@ async function main(): Promise<string> {
   const totalAverageRating =
     Object.keys(scores)
       .map(s => scores[s].averageRating)
-      .reduce((p, c) => p + c, 0) / Object.keys(scores).length;
+      .reduce((p: number, c: number) => p + c, 0) / Object.keys(scores).length;
   const averageNumberVotesTotal = totalVotesCast / Object.keys(scores).length;
 
   // foreach my $slug (keys %{ $scores }) {
