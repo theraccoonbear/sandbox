@@ -1,0 +1,17 @@
+{
+  "name": "trello",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "date-fns": "^2.15.0",
+    "dotenv": "^8.2.0",
+    "md5": "^2.2.1",
+    "trello-node-api": "^0.0.9"
+  },
+  "scripts": {
+    "run": "node index.js",
+    "setup": "cp sample.env .env"
+  }
+}
