@@ -26,11 +26,26 @@ import fetch from 'node-fetch';
 const Trello = new TrelloNodeAPI(TRELLO_API_KEY, TRELLO_OAUTH_TOKEN);
 
 import { format } from 'date-fns';
+import util from 'util';
+import * as cbfs from 'fs';
+import path from 'path';
+import { file } from 'terminal-image';
+
+const CACHE_DIR = '.cache';
+
+const fs = {
+    readFile: util.promisify(cbfs.readFile),
+    writeFile: util.promisify(cbfs.writeFile),
+    readdir: util.promisify(cbfs.readdir),
+};
+
 
 const currYear = format(new Date(), 'yyyy');
 
 let sharesBySlacker = {};
 let boardLists = [];
+
+const cachedTrelloResponses = {};
 
 export interface PreparedCard {
     id: string,
@@ -46,6 +61,7 @@ export interface PreparedCard {
     score: number,
     _meta: any,
     cover?: any,
+    urls: string[]
 }
 
 export interface RankedSlacker {
@@ -63,8 +79,57 @@ function recordSlackerShare(slacker, score) {
     sharesBySlacker[slacker].push(score);
 }
 
+export async function loadCache() {
+    const files = await fs.readdir(CACHE_DIR);
+    console.log(files);
+    await Promise.all(files.map(async f => {
+        const key = f.replace(/\.cache$/, '');
+        console.log(`Remembering ${key}`);
+        const file = path.join(CACHE_DIR, f);
+        const raw = await fs.readFile(file, { encoding: 'utf-8'});
+        try {
+            cachedTrelloResponses[key] = JSON.parse(raw);
+        } catch (err) {
+            console.log(`...curious ${key}`);
+            // console.error(file);
+            // console.log(raw);
+        }
+        return raw;
+    }));
+}
+
+function hasCache(key) {
+    return typeof cachedTrelloResponses[key] !== 'undefined';
+}
+
+export async function setCache(key, val) {
+    console.log('Caching:', key);
+    cachedTrelloResponses[key] = val;
+    const file = path.join(CACHE_DIR, `${key}.cache`);
+    await fs.writeFile(file, JSON.stringify(val));
+}
+
+export async function getCache(key, val) {
+    console.log('Fetching:', key);
+    return cachedTrelloResponses[key];
+}
+
+export async function APICall(objType: string, method: string, ...params: string[]) {
+    const key = [objType, method, params].join('.')
+
+    if (hasCache(key)) {
+        console.log('Cache Hit!', key);
+        return cachedTrelloResponses[key];
+    }
+    const resp = await Trello[objType][method](...params);
+    
+    setCache(key, resp)
+    return resp
+}
+
 async function listCards(boardId) {
-    return Trello.board.searchCards(boardId);
+    return APICall('board', 'searchCards', boardId);
+    // return Trello.board.searchCards(boardId);
 }
 
 const sharedRgx = /^(?<album>.+), by (?<artist>.*?)( shared by (?<slacker>.+))?$/ism;
@@ -111,13 +176,18 @@ export function roundToNearest(num: number, nth: number = 10) {
 }
 
 export async function getCardAttachment(cardId: string, attachmentId: string) {
-    const attach = await Trello.card.searchAttachmentByAttachmentId(cardId, attachmentId);
+    // const attach = await Trello.card.searchAttachmentByAttachmentId(cardId, attachmentId);
+    const attach = await APICall('card','searchAttachmentByAttachmentId', cardId, attachmentId);
     const image = await fetch(attach.url);
     attach.imageBuffer = await image.buffer();
     return attach;
 }
 
-export async function prepareCard(c: any) {
+export async function listCardAttachments(cardId: string) {
+    return await APICall('card','searchAttachments', cardId);
+}
+
+export async function prepareCard(c: any, populate: boolean = false) {
     let card: PreparedCard = {
         id: c.id,
         idBoard: c.idBoard,
@@ -126,7 +196,8 @@ export async function prepareCard(c: any) {
         name: c.name,
         desc: c.desc,
         score: 0,
-        _meta: c
+        _meta: c,
+        urls: []
     };
 
     card.name = card.name.replace(/\s+$/gism, '');
@@ -163,9 +234,14 @@ export async function prepareCard(c: any) {
         }
     }
 
+    const attachments = await listCardAttachments(c.id);
+
+    card.urls = attachments.filter(a => /\.bandcamp\.com/.test(a.url)).map(a => a.url);
+
+
     // console.log(c.cover.idAttachment);
     try {
-        if (c.cover && c.cover.idAttachment) {
+        if (populate && c.cover && c.cover.idAttachment) {
             card.cover = await getCardAttachment(card.id, c.cover.idAttachment);
         }
     } catch (err) {
@@ -238,7 +314,8 @@ export async function slackerCompatability() {
 
 export async function getNextPlay() {
     if (boardLists.length < 1) {
-        boardLists = await Trello.board.searchLists(TRELLO_BOARD_ID);
+        // boardLists = await Trello.board.searchLists(TRELLO_BOARD_ID);
+        boardLists = await APICall('board', 'searchLists', TRELLO_BOARD_ID);
     }
 
     const queueList: any = [...boardLists.filter((l: any) => cleanName(l.name) === cleanName(TRELLO_QUEUE_LIST_NAME)), false].shift();
@@ -247,12 +324,12 @@ export async function getNextPlay() {
         throw new Error(`Couldn't find a Trello list called "${TRELLO_QUEUE_LIST_NAME}"`);
     }
     
-    const results = await Trello.board.searchCards(TRELLO_BOARD_ID);
+    // const results = await Trello.board.searchCards(TRELLO_BOARD_ID);
+    const results = await APICall('board', 'searchCards', TRELLO_BOARD_ID);
 
     const options = await Promise.all(
         results
             .filter((c: any) => c.idList === queueList.id)
-            // .map(c => prepareCard(c))
     );
 
 
@@ -260,13 +337,6 @@ export async function getNextPlay() {
         throw new Error("nothing in the queue, check back later");
     }
 
-    return prepareCard(options[0]);
+    return prepareCard(options[0], true);
 }
 
-// module.exports = {
-//     cleanName,
-//     getNextPlay,
-//     prepareCard,
-//     scoreRelease,
-//     slackerCompatability
-// };

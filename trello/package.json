@@ -8,6 +8,7 @@
     "date-fns": "^2.15.0",
     "dotenv": "^8.2.0",
     "md5": "^2.2.1",
+    "node-emoji": "^1.10.0",
     "node-fetch": "^2.6.0",
     "terminal-image": "^1.2.0",
     "trello-node-api": "^0.0.9",
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@types/chalk": "^2.2.0",
     "@types/node": "^12.12.14",
+    "@types/node-emoji": "^1.8.1",
     "@types/node-fetch": "^2.5.7",
     "@typescript-eslint/eslint-plugin": "^2.10.0",
     "@typescript-eslint/parser": "^2.10.0",
