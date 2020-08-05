@@ -8,10 +8,30 @@
     "date-fns": "^2.15.0",
     "dotenv": "^8.2.0",
     "md5": "^2.2.1",
-    "trello-node-api": "^0.0.9"
+    "node-fetch": "^2.6.0",
+    "terminal-image": "^1.2.0",
+    "trello-node-api": "^0.0.9",
+    "yargs": "^15.4.1"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/node": "^12.12.14",
+    "@types/node-fetch": "^2.5.7",
+    "@typescript-eslint/eslint-plugin": "^2.10.0",
+    "@typescript-eslint/parser": "^2.10.0",
+    "eslint": "^6.7.2",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "prettier": "^1.19.1",
+    "source-map-support": "^0.5.19"
   },
   "scripts": {
-    "run": "node index.js",
+    "build": "tsc",
+    "build:watch": "yarn build -w",
+    "lint": "tsc --noEmit && eslint '*/**/*.{js,ts,tsx}' --quiet",
+    "lint:fix": "yarn lint --fix",
+    "compat": "node dist/scripts/compat.js",
+    "nextup": "node dist/scripts/nextup.js",
     "setup": "cp sample.env .env"
   }
 }

@@ -6,7 +6,7 @@
   "author": "Don",
   "license": "MIT",
   "scripts": {
-    "build": "./node_modules/.bin/tsc",
+    "build": "tsc",
     "build:watch": "yarn build -w",
     "start": "node dist/process-picks.js",
     "lint": "tsc --noEmit && eslint '*/**/*.{js,ts,tsx}' --quiet",
