@@ -12,7 +12,7 @@ async function main() {
         process.exit(0);
     }
 
-    const maxHeartCount = 20;
+    const maxHeartCount = 10;
 
     // const max = roundToNearest(slackers.reduce((p: number, s: RankedSlacker) => Math.max(p, s.percent), 0)) / maxHeartCount;
     const maxShares = slackers.reduce((p: number, s: RankedSlacker) =>  Math.max(p, s.count), 0);

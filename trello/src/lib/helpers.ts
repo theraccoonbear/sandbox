@@ -5,6 +5,7 @@ const TRELLO_API_KEY = process.env.TRELLO_API_KEY;
 const TRELLO_OAUTH_TOKEN = process.env.TRELLO_OAUTH_TOKEN;
 const TRELLO_BOARD_ID = process.env.TRELLO_BOARD_ID || '';
 const TRELLO_QUEUE_LIST_NAME = process.env.TRELLO_QUEUE_LIST_NAME;
+const MAX_CACHE_AGE_IN_MINUTES = parseInt(process.env.MAX_CACHE_AGE_IN_MINUTES || '5', 10);
 
 if (!TRELLO_API_KEY) {
     throw new Error("No TRELLO_API_KEY");
@@ -25,19 +26,28 @@ import fetch from 'node-fetch';
 
 const Trello = new TrelloNodeAPI(TRELLO_API_KEY, TRELLO_OAUTH_TOKEN);
 
-import { format } from 'date-fns';
-import util from 'util';
-import * as cbfs from 'fs';
+import { format, differenceInSeconds } from 'date-fns';
+import fs from './fs';
 import path from 'path';
-import { file } from 'terminal-image';
+import { BandcampAlbum } from './bandcamp';
 
 const CACHE_DIR = '.cache';
 
-const fs = {
-    readFile: util.promisify(cbfs.readFile),
-    writeFile: util.promisify(cbfs.writeFile),
-    readdir: util.promisify(cbfs.readdir),
+
+
+export interface APIRequest {
+    objType: string,
+    method: string,
+    params?: string[],
 };
+
+export interface APICallHistory {
+    timestamp: Date,
+    request: APIRequest,
+    response?: any,
+};
+
+const apiReqHist: APICallHistory[] = [];
 
 
 const currYear = format(new Date(), 'yyyy');
@@ -55,7 +65,8 @@ export interface PreparedCard {
     name: string,
     desc: string,
     artist?: string,
-    album?: string
+    album?: string,
+    BCAlbum?: BandcampAlbum,
     slacker?: string,
     releaseDate?: Date,
     score: number,
@@ -79,22 +90,33 @@ function recordSlackerShare(slacker, score) {
     sharesBySlacker[slacker].push(score);
 }
 
+export function terminalHyperlink(url: string, text: string): string {
+    var esc = String.fromCharCode(27);
+    return `${esc}]8;;${url}${esc}\\${text}${esc}]8;;${esc}\\`;
+}
+
 export async function loadCache() {
     const files = await fs.readdir(CACHE_DIR);
-    console.log(files);
+    // console.log(files);
+    const now = new Date();
     await Promise.all(files.map(async f => {
         const key = f.replace(/\.cache$/, '');
-        console.log(`Remembering ${key}`);
+        // console.log(`Remembering ${key}`);
         const file = path.join(CACHE_DIR, f);
-        const raw = await fs.readFile(file, { encoding: 'utf-8'});
-        try {
-            cachedTrelloResponses[key] = JSON.parse(raw);
-        } catch (err) {
-            console.log(`...curious ${key}`);
-            // console.error(file);
-            // console.log(raw);
+        const stat = await fs.stat(file);
+        const age = differenceInSeconds(now, stat.mtime);
+        // console.log(`${key} is ${age} seconds old`);
+        if (age < 60 * MAX_CACHE_AGE_IN_MINUTES) { // default 5 minute cache expiry
+            const raw = await fs.readFile(file, { encoding: 'utf-8'});
+            try {
+                cachedTrelloResponses[key] = JSON.parse(raw);
+            } catch (err) {
+                console.log(`...curious ${key}`);
+                console.error(file);
+                console.log(raw);
+            }
+            return raw;
         }
-        return raw;
     }));
 }
 
@@ -103,26 +125,61 @@ function hasCache(key) {
 }
 
 export async function setCache(key, val) {
-    console.log('Caching:', key);
+    // console.log('Caching:', key);
     cachedTrelloResponses[key] = val;
     const file = path.join(CACHE_DIR, `${key}.cache`);
     await fs.writeFile(file, JSON.stringify(val));
 }
 
 export async function getCache(key, val) {
-    console.log('Fetching:', key);
+    // console.log('Fetching:', key);
     return cachedTrelloResponses[key];
+}
+
+function APIRequestsInSeconds(seconds: number): number {
+    const now = new Date();
+    return apiReqHist.filter(h => differenceInSeconds(now, h.timestamp) <= seconds).length;
 }
 
 export async function APICall(objType: string, method: string, ...params: string[]) {
     const key = [objType, method, params].join('.')
 
     if (hasCache(key)) {
-        console.log('Cache Hit!', key);
+        // console.log('Cache Hit!', key);
         return cachedTrelloResponses[key];
     }
+
+    const now = new Date();
+
+    // API Rate Limits
+    // To help prevent strain on Trello’s servers, our API imposes rate limits per API key for all issued tokens.
+    // There is a limit of 300 requests per 10 seconds for each API key and no more than 100 requests per 10 second
+    // interval for each token. If a request exceeds the limit, Trello will return a 429 error.
+    // source: https://help.trello.com/article/838-api-rate-limits
+
+    let inLast10 = APIRequestsInSeconds(10);
+    if (inLast10 >= 100) {
+        await new Promise((resolve, reject) => {
+            const intTimer = setInterval(() => {
+                inLast10 = APIRequestsInSeconds(10);
+                if (inLast10 < 100) {
+                    clearInterval(intTimer);
+                    resolve();
+                }
+            }, 1000)
+        })    
+    }
+
+    const apiHit: APICallHistory = {
+        timestamp: new Date(),
+        request: { objType, method, params },
+    };
+    apiReqHist.push(apiHit);
+
     const resp = await Trello[objType][method](...params);
+    apiHit.response = resp;
     
+
     setCache(key, resp)
     return resp
 }
@@ -230,7 +287,7 @@ export async function prepareCard(c: any, populate: boolean = false) {
             const mon = parseInt(match.groups.mon, 10);
             const day = parseInt(match.groups.day, 10);
             const year = parseInt(match.groups.year || currYear, 10);
-            card.releaseDate = new Date(year, mon, day);
+            card.releaseDate = new Date(year, mon - 1, day);
         }
     }
 
