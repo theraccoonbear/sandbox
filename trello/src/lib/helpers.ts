@@ -6,6 +6,7 @@ const TRELLO_OAUTH_TOKEN = process.env.TRELLO_OAUTH_TOKEN;
 const TRELLO_BOARD_ID = process.env.TRELLO_BOARD_ID || '';
 const TRELLO_QUEUE_LIST_NAME = process.env.TRELLO_QUEUE_LIST_NAME;
 const MAX_CACHE_AGE_IN_MINUTES = parseInt(process.env.MAX_CACHE_AGE_IN_MINUTES || '5', 10);
+const CUSTOM_EVALUATOR = process.env.CUSTOM_EVALUATOR || 'default';
 
 if (!TRELLO_API_KEY) {
     throw new Error("No TRELLO_API_KEY");
@@ -19,6 +20,10 @@ if (!TRELLO_BOARD_ID) {
 if (!TRELLO_QUEUE_LIST_NAME) {
     throw new Error("No TRELLO_QUEUE_LIST_NAME");
 }
+
+console.log(`Using the "${CUSTOM_EVALUATOR}" evaluator`);
+const { scoreRelease } = require(`./custom/${CUSTOM_EVALUATOR}`);
+
 
 import TrelloNodeAPI from 'trello-node-api';
 
@@ -184,40 +189,47 @@ export async function APICall(objType: string, method: string, ...params: string
     return resp
 }
 
-async function listCards(boardId) {
+export async function listElligibleCards(boardId) {
+    const cards = await listCards(boardId);
+    return Promise.all(cards.map(async c => {
+        return prepareCard(c);
+    }));
+}
+
+export async function listCards(boardId) {
     return APICall('board', 'searchCards', boardId);
     // return Trello.board.searchCards(boardId);
 }
 
 const sharedRgx = /^(?<album>.+), by (?<artist>.*?)( shared by (?<slacker>.+))?$/ism;
 const artAlbRgx = /^(?<album>[^|]+?)\s+\|\s+(?<artist>.+)$/ism;
-const releaseDateRgx = /(^|[^\d])(?<mon>[1-9]|1[012])\/(?<day>[1-9]|[12][0-9]|3[01])(?:\/(?<year>\d{2,4}))?($|[^\d])/ism;
+const releaseDateRgx = /(^|[^\d])(?<mon>[1-9]|1[012])\/(?<day>0?[1-9]|[12][0-9]|3[01])(?:\/(?<year>\d{2,4}))?($|[^\d])/ism;
 
 let totalShares = 0;
 const shareScores: number[] = [];
 
-export function scoreRelease(release) {
-    if (release.has_older) { return -1; }
-    if (release.has_ripper) {
-        if (release.has_not_bad) {
-            return 4;
-        }
-        return 5;
-    }
+// export function scoreRelease(release) {
+//     if (release.has_older) { return -1; }
+//     if (release.has_ripper) {
+//         if (release.has_not_bad) {
+//             return 4;
+//         }
+//         return 5;
+//     }
 
-    if (release.has_not_bad) {
-        if (release.has_flusher) {
-            return 2;
-        }
-        return 3;
-    }
+//     if (release.has_not_bad) {
+//         if (release.has_flusher) {
+//             return 2;
+//         }
+//         return 3;
+//     }
 
-    if (release.has_flusher) {
-        return 1;
-    }
+//     if (release.has_flusher) {
+//         return 1;
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
 
 export function cleanName(name) {
     return name

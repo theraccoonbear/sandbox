@@ -86,13 +86,13 @@ async function main() {
         const combined: string[] = [];
         let width = 0;
         for (let i = 0; i < maxRows; i++) {
-            combined.push(`${imageLines[i] || ''}  ${details[i] || ''}`);
-            width = imageLines[i].length + 2;
+            combined.push(` ${imageLines[i] || ''}  ${details[i] || ''}`);
+            width = imageLines[i].length + 3;
         }
 
         if (imageLines.length > maxRows) {
             for (let i = maxRows; i < imageLines.length; i++) {
-                combined.push(`${imageLines[i] || ''}`);
+                combined.push(` ${imageLines[i] || ''}`);
             }
         } else if (details.length > maxRows) {
             for (let i = maxRows; i < details.length; i++) {
@@ -101,6 +101,7 @@ async function main() {
         }
 
 
+        console.log("\n\n");
         console.log(combined.join("\n"));
 
         // console.log(image);
@@ -108,6 +109,7 @@ async function main() {
         // console.log(`${artist} - ${album}${runTime}${slacker}\n\n${release}\n\n${chalk.bold('TRACKS:')}\n${tracks.join("\n")}\n\n${desc}\n${urls}`);
     } catch (err) {
         console.error(`D'oh! ${err.message}`);
+        console.error(err);
     }
 }
 
