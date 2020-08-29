@@ -12,6 +12,7 @@
     "md5": "^2.2.1",
     "node-emoji": "^1.10.0",
     "node-fetch": "^2.6.0",
+    "terminal-bar": "^0.0.3",
     "terminal-image": "^1.2.0",
     "trello-node-api": "^0.0.9",
     "yargs": "^15.4.1"
@@ -38,6 +39,7 @@
     "lint:fix": "yarn lint --fix",
     "compat": "node dist/scripts/compat.js",
     "nextup": "node dist/scripts/nextup.js",
+    "monthly": "node dist/scripts/monthly.js",
     "setup": "cp sample.env .env"
   }
 }

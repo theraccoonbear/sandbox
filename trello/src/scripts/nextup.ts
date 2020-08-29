@@ -14,7 +14,7 @@ async function main() {
         await loadCache();
 
         const nextUp: PreparedCard = await getNextPlay();
-        const image = await terminalImage.buffer(nextUp.cover.imageBuffer, { width: 60 });
+        const image = await terminalImage.buffer(nextUp.cover.imageBuffer, { width: 50 });
         
         const artist = chalk.bold(chalk.cyanBright(nextUp.artist));
         const album = chalk.italic(chalk.greenBright(nextUp.album))
@@ -40,7 +40,7 @@ async function main() {
         }
 
         const urls = `${chalk.whiteBright(urlList.join(` ${chalk.green('//')} `))}\n`;
-        const slacker = nextUp.slacker ? ` [${chalk.yellow(nextUp.slacker)}]` : '';
+        
         let release = '';
         if (nextUp.releaseDate) {
             nextUp.releaseDate = new Date(2020, 7, 15);
@@ -65,9 +65,17 @@ async function main() {
 
             release = `Releas${future ? 'ing' : 'ed'} ${chalk.blueBright(format(nextUp.releaseDate, 'EEE MMM d'))} (${time})`;
         }
-        const runTime = nextUp.BCAlbum ? ` (${chalk.cyan('running time')} ${chalk.yellowBright(Math.floor(nextUp.BCAlbum.runningTimeSeconds / 60))} ${chalk.cyan('minutes')})` : ''
+
+        const runAndSlack: string[] = [];
+        if (nextUp.BCAlbum) {
+            runAndSlack.push(`${chalk.cyan('Running time')} ${chalk.yellowBright(Math.floor(nextUp.BCAlbum.runningTimeSeconds / 60))} ${chalk.cyan('minutes')}`);
+        }
+        if (nextUp.slacker) {
+            runAndSlack.push(`[${chalk.yellow(nextUp.slacker)}]`);
+        }
         const details = [
-            `${artist} - ${album}${runTime}${slacker}`,
+            `${artist} - ${album}`,
+            runAndSlack.join(' '),
             '',
             release,
             '', 

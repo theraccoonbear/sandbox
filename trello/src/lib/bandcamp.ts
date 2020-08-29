@@ -48,7 +48,8 @@ export async function scrape(BCAlbum, html) {
                 const parsed = json5.parse(stuff);
                 if (parsed && parsed.trackinfo && Array.isArray(parsed.trackinfo)) {
                     await Promise.all(parsed.trackinfo.map(async (track) => {
-                        const filePath = path.join(albumPath, `${track.title}.mp3`);
+                        const fileName = track.title.replace(/[^ A-Za-z0-9_]+/g, '-');
+                        const filePath = path.join(albumPath, `${fileName}.mp3`);
                         if (track && track.file && !await fs.exists(filePath)) {
                             const mp3 = await fetch(track.file['mp3-128']);
                             await fs.writeFile(filePath, await mp3.buffer());
@@ -58,6 +59,7 @@ export async function scrape(BCAlbum, html) {
             } catch (err) {
                 console.error('JSON5 Parse Error:');
                 console.error(err);
+                process.exit(1);
             }
         }
     }
@@ -110,10 +112,7 @@ export async function loadAlbum(albumUrl: string): Promise<BandcampAlbum> {
         runningTimeDisplay: `${runMin}:${(runSec < 10 ? '0' : '') + runSec}`
     };
 
-    const scraped = await scrape(BCAlbum, html);
-
-
-    // console.log(BCAlbum);
+    await scrape(BCAlbum, html);
 
     return BCAlbum;
 }

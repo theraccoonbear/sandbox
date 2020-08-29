@@ -22,7 +22,7 @@ if (!TRELLO_QUEUE_LIST_NAME) {
 }
 
 console.log(`Using the "${CUSTOM_EVALUATOR}" evaluator`);
-const { scoreRelease } = require(`./custom/${CUSTOM_EVALUATOR}`);
+export const { scoreRelease, filterCard, MAX_SCORE } = require(`./custom/${CUSTOM_EVALUATOR}`);
 
 
 import TrelloNodeAPI from 'trello-node-api';
@@ -31,7 +31,7 @@ import fetch from 'node-fetch';
 
 const Trello = new TrelloNodeAPI(TRELLO_API_KEY, TRELLO_OAUTH_TOKEN);
 
-import { format, differenceInSeconds } from 'date-fns';
+import { format, differenceInSeconds, parse } from 'date-fns';
 import fs from './fs';
 import path from 'path';
 import { BandcampAlbum } from './bandcamp';
@@ -62,6 +62,20 @@ let boardLists = [];
 
 const cachedTrelloResponses = {};
 
+
+export interface PreparedList {
+    monthNumber: number;
+    id: string
+    name: string,
+    closed: boolean,
+    pos: number,
+    softLimit: null,
+    idBoard: string,
+    subscribed: boolean,
+    parseDate: string,
+    date: Date,
+  }
+
 export interface PreparedCard {
     id: string,
     idBoard: string,
@@ -77,7 +91,8 @@ export interface PreparedCard {
     score: number,
     _meta: any,
     cover?: any,
-    urls: string[]
+    urls: string[],
+    list?: any,
 }
 
 export interface RankedSlacker {
@@ -118,7 +133,7 @@ export async function loadCache() {
             } catch (err) {
                 console.log(`...curious ${key}`);
                 console.error(file);
-                console.log(raw);
+                console.log(`"${raw}"`);
             }
             return raw;
         }
@@ -133,7 +148,25 @@ export async function setCache(key, val) {
     // console.log('Caching:', key);
     cachedTrelloResponses[key] = val;
     const file = path.join(CACHE_DIR, `${key}.cache`);
-    await fs.writeFile(file, JSON.stringify(val));
+
+    const json = JSON.stringify(val);
+    // if (/5e2ce6164aed8d3bcfc31475/.test(key)) {
+    //     console.log('WRITING CACHE FOR 5e2ce6164aed8d3bcfc31475');
+    //     console.log('Data:', val);
+    //     console.log('JSON:', json);
+    //     // process.exit(0);
+    // }
+    if (json.trim().length < 1) { 
+        console.log('cache wat!', key, val);
+        // process.exit(0);
+        return 
+    }
+    try {
+        // console.log(`${key} => ${file}`);
+        await fs.writeFile(file, json);
+    } catch (err) {
+        console.log(`File write error!`, err);
+    }
 }
 
 export async function getCache(key, val) {
@@ -189,11 +222,38 @@ export async function APICall(objType: string, method: string, ...params: string
     return resp
 }
 
-export async function listElligibleCards(boardId) {
-    const cards = await listCards(boardId);
-    return Promise.all(cards.map(async c => {
-        return prepareCard(c);
-    }));
+export async function getMonthListsForBoard(boardId: string = TRELLO_BOARD_ID): Promise<{[key: string]: PreparedList}> {
+    const allLists = await APICall('board', 'searchLists', boardId);
+    const listsByID: { 
+        [key: string]: PreparedList
+    } = {};
+    const now = new Date();
+    allLists
+        .filter(l => /^[A-Z]{3}\s+'\d{2}$/i.test(l.name))
+        .map((l: PreparedList) => {
+            l.parseDate = l.name.replace(/[^a-z0-9\s]+/gi, '');
+            l.date = parse(l.parseDate, "MMM yy", now);
+            l.monthNumber = parseInt(format(l.date, 'M'), 10);
+            return l;
+        })
+        .forEach(l => listsByID[l.id] = l);
+    return listsByID;
+}
+
+export async function listElligibleCards(boardId: string = TRELLO_BOARD_ID): Promise<PreparedList[]> {
+    const cards = await APICall('board', 'searchCards', boardId);
+    const listsByID = await getMonthListsForBoard(boardId);
+    // console.log(Object.keys(listsByID));
+    return Promise.all(cards
+        .filter(c => filterCard(c, { lists: listsByID }))
+        .map(async c => {
+            const card = await prepareCard(c);
+            card.list = listsByID[c.idList];
+            // console.log(card);
+            // process.exit(0);
+            return card;
+        })
+    );
 }
 
 export async function listCards(boardId) {
@@ -207,29 +267,6 @@ const releaseDateRgx = /(^|[^\d])(?<mon>[1-9]|1[012])\/(?<day>0?[1-9]|[12][0-9]|
 
 let totalShares = 0;
 const shareScores: number[] = [];
-
-// export function scoreRelease(release) {
-//     if (release.has_older) { return -1; }
-//     if (release.has_ripper) {
-//         if (release.has_not_bad) {
-//             return 4;
-//         }
-//         return 5;
-//     }
-
-//     if (release.has_not_bad) {
-//         if (release.has_flusher) {
-//             return 2;
-//         }
-//         return 3;
-//     }
-
-//     if (release.has_flusher) {
-//         return 1;
-//     }
-
-//     return 0;
-// }
 
 export function cleanName(name) {
     return name
