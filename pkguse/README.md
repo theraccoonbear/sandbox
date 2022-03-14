@@ -2,7 +2,7 @@
 
 ## About
 
-This is a small Node CLI tool that will help stich together some grep commands to locate package usages in a Java project.
+This is a small Node CLI tool that will help stitch together some grep commands to locate package usages in a Java project.
 
 ## Usage
 
