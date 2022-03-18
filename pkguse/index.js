@@ -16,6 +16,41 @@ if (typeof argv.p !== 'string') {
     process.exit(1);
 }
 
+const findCommonPrefix = (things) => {
+    if (things.length < 1) { return ''; }
+    const first = things[0];
+    const rest = things.slice(1);
+    let portion = first;
+    for (let t of rest) {
+        while (portion.length >= 1 && t.indexOf(portion) !== 0) {
+            const newPortion = portion
+                .split(/\//)
+                .slice(0, -1)
+                .join('/');
+            portion = newPortion;
+        }
+        if (portion.length < 1) {
+            break;
+        }
+    }
+    return portion;
+};
+
+const compressPrefix = (prefix, path) => {
+    const repRgx = new RegExp(`^.{${prefix.length}}`);
+    // const compPre = prefix
+    //     .split(/\//)
+    //     .filter(Boolean)
+    //     .map(p => p[0].toLowerCase())
+    //     .join('/');
+    return path.replace(repRgx, '...');
+}
+
+const reduceSharedPrefix = things => {
+    const pre = findCommonPrefix(things);
+    return things.map(t => compressPrefix(pre, t));
+}
+
 RegExp.escape = text => text.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
 
 const CODE_ROOT = process.env.CODE_ROOT || '';
@@ -46,6 +81,7 @@ const main = async (pkg, directory) => {
         process.exit(1);
     }
 
+    
     try {
         console.error(`Scanning "${dir}" for \`${pkg}\` imports...\n`);
         const resp = await execa('grep', [`-iRE`, `--include`, `*.java`, `import (static )?${pkg}`, ...dirs]);
@@ -76,19 +112,37 @@ const main = async (pkg, directory) => {
 
         const importRgx = new RegExp(`import ${pkg}`);
 
-        const usages = stdout2.split(/\n/)
+        const usages = stdout2
+            .split(/\n/)
             .filter(filtering)
             .filter(l => !importRgx.test(l))
             .map(l => l.replace(rootRgx, ''));
             
 
-        console.log(usages.join("\n"));
+        // const root = findCommonPrefix(usages);
+        const prefix = findCommonPrefix(usages);
+        const newUsages = reduceSharedPrefix(usages);
+
+        if (prefix.length > 0) {
+            console.log(`Relative to ${prefix}...`)
+        }
+        console.log(newUsages.map(u => `   ${u}`).join("\n"));
         console.error(`\nFound ${usages.length} _likely_ usages, or references to, these classes.\n`);
 
         process.exit(0);
     } catch (err) {
-        console.error('Oh dear', err);
-        process.exit(1);
+        if (err.stderr) {
+            if (err.stderr.length > 0) {
+                console.error('Oh dear', err);
+                process.exit(1);
+            }
+        } else {
+            console.error('ERROR:', err);
+            process.exit(1);
+        }
+        
+        console.log('No matches!\n');
+        process.exit(0);
     }
 };
 
