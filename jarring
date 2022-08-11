@@ -93,12 +93,13 @@ echo -e "  v"$LOCAL_VERSIONS "\n"
 echo Published $ARTIFACT_ID v$VERSION "\n"
 
 read -r -d '' USAGE <<-EOF
-To use:
+Usage in pom.xml:
 
     <dependency>
         <groupId>$GROUP_ID</groupId>
         <artifactId>$ARTIFACT_ID</artifactId>
         <version>$VERSION</version>
     </dependency>
+
 EOF
 echo "$USAGE"
