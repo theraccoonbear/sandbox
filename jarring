@@ -1,0 +1,104 @@
+#!/bin/zsh
+
+# Build and install a local copy of a Java library (optionally specifying a version to install as)
+
+DELIMETER=_
+NEWLINE="\n"
+LOCAL_REPO=~/.m2/repository/com/rei
+# GROUP_ID=com.rei
+LOG_FILE=~/.jarring.log
+
+# Default is `0.1-local`, `-local` is always appended
+VERSION=${1:-0.1}-local
+
+echo Building $ARTIFACT_ID v$VERSION
+
+if [ -f $LOG_FILE ]
+then
+    rm $LOG_FILE
+fi
+
+# echo '--- START OF BUILD ---------' >> $LOG_FILE
+mvn clean install -DskipTests -DskipFebs >> $LOG_FILE
+# echo '--- END OF BUILD ---------' >> $LOG_FILE
+
+if [ $? -ne "0" ]
+then
+    echo "Build failed! Check ~/.jarring.log for details"
+    exit 1;
+fi
+
+if [ ! -d 'target' ]
+then
+    echo "no ./target/ found"
+    exit 1;
+fi
+
+# Find our JAR file
+JAR=$(ls target/*-99999-SNAPSHOT.jar)
+# echo "JAR:" $JAR
+
+if [ ! -f $JAR ]
+then
+    echo "Can't find JAR: $JAR"
+    exit 1;
+fi
+
+# Find the POM listed in the JAR
+JARPOM=`jar tf "$JAR" | grep pom.xml`
+# echo $JARPOM
+
+# temp file
+POM=__tmp-POM.xml
+
+# Grab just the POM from the JAR
+unzip -p "$JAR" "$JARPOM" > "$POM"
+
+# remove all of the XML namespacing stuff so xmllint can handle it
+gsed -i 's/\(xmlns\(:xsi\)\?\|xsi:.*\)="[^"]*"//g' $POM
+
+# use XPath to get the artifactId
+ARTIFACT_ID=$(xmllint --xpath '/project/artifactId/text()' $POM)
+# echo "ARTIFACT_ID:" $ARTIFACT_ID
+
+# use XPath to get the groupId
+POM_GROUP_ID=$(xmllint --xpath '/project/groupId/text()' $POM)
+GROUP_ID=${2:-$POM_GROUP_ID}
+# echo "GROUP_ID:" $GROUP_ID
+
+rm $POM
+
+# Local version listing
+LOCAL_ARTIFACT_REPO=$LOCAL_REPO/$ARTIFACT_ID/maven-metadata-local.xml
+# cat $LOCAL_ARTIFACT_REPO
+
+echo Publishing $ARTIFACT_ID v$VERSION
+
+# echo '--- START OF PUBLISH  ---------' >> $LOG_FILE
+# echo "mvn install:install-file -Dfile=$JAR -DgroupId=$GROUP_ID -DartifactId=$ARTIFACT_ID -Dversion=$VERSION -Dpackaging=jar >> $LOG_FILE"
+mvn install:install-file -Dfile=$JAR -DgroupId=$GROUP_ID -DartifactId=$ARTIFACT_ID -Dversion=$VERSION -Dpackaging=jar >> $LOG_FILE
+# echo '--- END OF PUBLISH ---------' >> $LOG_FILE
+
+if [ $? -ne "0" ]
+then
+    echo "Install failed! Check ~/.jarring.log for details"
+    exit 1;
+fi
+
+LOCAL_VERSIONS=$(xpath -s $DELIMETER -e '/metadata/versioning/versions/version/text()' $LOCAL_ARTIFACT_REPO 2>/dev/null | rev | cut -c2- | rev | sed -e "s/$DELIMETER/$NEWLINE  v/g")
+
+echo -e "\nLocally installed versions of $ARTIFACT_ID:"
+echo -e "  v"$LOCAL_VERSIONS "\n"
+
+echo Published $ARTIFACT_ID v$VERSION "\n"
+
+read -r -d '' USAGE <<-EOF
+To use:
+
+    <dependency>
+        <groupId>$GROUP_ID</groupId>
+        <artifactId>$ARTIFACT_ID</artifactId>
+        <version>$VERSION</version>
+    </dependency>
+EOF
+echo "$USAGE"
